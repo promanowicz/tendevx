@@ -1,0 +1,102 @@
+Jesteś doświadczonym menedżerem produktu, którego zadaniem jest stworzenie kompleksowego dokumentu wymagań produktu (PRD) w oparciu o poniższe opisy:
+
+<project_description>
+## Główny problem
+Aplikacja służy do zarządzania kampaniami reklamowymi dla konkretnego klienta.
+umożliwiając tworzenie i zarządzanie kampaniami,
+a także monitorowanie ich skuteczności.
+
+## Najmniejszy zestaw funkcjonalności
+ - Tworzenie, przeglądanie i edytowanie kampanii reklamowych zawierających zdjęcie i tekst.
+ - System kont użytkowników
+ - Mierzenie konwersji kampanii
+ - AI dające sugestie dotyczące poprawy kampanii
+
+## Co NIE wchodzi w zakres MVP
+W skład MVP nie wchodzi:
+ - Integracja z zewnętrznymi systemami reklamowymi
+ - Zaawansowane raportowanie i analizy
+ - Obsługa wielu języków
+ - Wsparcie dla różnych formatów reklamowych
+</project_description>
+
+<project_details>
+Aplikacja Commercial Manager to narzędzie do zarządzania kampaniami marketingowymi, skierowane przede wszystkim do pracowników firmy marketingowej. Głównym celem aplikacji jest umożliwienie użytkownikom prostego tworzenia i zarządzania kampaniami marketingowymi prowadzonymi przez firmę.
+
+**Główne wymagania funkcjonalne produktu:**
+1. Tworzenie, przeglądanie i edytowanie kampanii reklamowych zawierających zdjęcie i tekst
+2. System kont użytkowników z dwoma poziomami dostępu:
+   - Pełny dostęp (włącznie z funkcjami AI)
+   - Ograniczony dostęp (bez funkcji AI)
+3. Mierzenie konwersji kampanii poprzez liczenie kliknięć w linki afiliacyjne
+4. Funkcje AI dostarczające sugestie dotyczące poprawy kampanii (dostępne tylko dla użytkowników z pełnym dostępem)
+
+**Kluczowe historie użytkownika i ścieżki korzystania:**
+1. Jako pracownik marketingu, chcę móc łatwo tworzyć nowe kampanie reklamowe, aby efektywnie promować produkty klientów.
+2. Jako pracownik marketingu, chcę móc edytować istniejące kampanie, aby dostosować je do zmieniających się potrzeb.
+3. Jako pracownik marketingu, chcę mieć dostęp do statystyk konwersji kampanii, aby ocenić ich skuteczność.
+4. Jako pracownik marketingu z pełnym dostępem, chcę otrzymywać sugestie AI dotyczące poprawy kampanii, aby zwiększyć ich skuteczność.
+5. Jako administrator, chcę móc zarządzać kontami użytkowników i przydzielać im odpowiednie poziomy dostępu.
+
+**Kryteria sukcesu i sposoby ich mierzenia:**
+1. Skuteczność kampanii mierzona liczbą kliknięć w linki afiliacyjne
+2. Łatwość użytkowania aplikacji przez pracowników marketingu
+3. Przydatność sugestii AI w poprawie skuteczności kampanii
+</project_details>
+
+Wykonaj następujące kroki, aby stworzyć kompleksowy i dobrze zorganizowany dokument:
+
+1. Podziel PRD na następujące sekcje:
+   a. Przegląd projektu
+   b. Problem użytkownika
+   c. Wymagania funkcjonalne
+   d. Granice projektu
+   e. Historie użytkownika
+   f. Metryki sukcesu
+
+2. W każdej sekcji należy podać szczegółowe i istotne informacje w oparciu o opis projektu i odpowiedzi na pytania wyjaśniające. Upewnij się, że:
+   - Używasz jasnego i zwięzłego języka
+   - W razie potrzeby podajesz konkretne szczegóły i dane
+   - Zachowujesz spójność w całym dokumencie
+   - Odnosisz się do wszystkich punktów wymienionych w każdej sekcji
+
+3. Podczas tworzenia historyjek użytkownika i kryteriów akceptacji
+   - Wymień WSZYSTKIE niezbędne historyjki użytkownika, w tym scenariusze podstawowe, alternatywne i skrajne.
+   - Przypisz unikalny identyfikator wymagań (np. US-001) do każdej historyjki użytkownika w celu bezpośredniej identyfikowalności.
+   - Uwzględnij co najmniej jedną historię użytkownika specjalnie dla bezpiecznego dostępu lub uwierzytelniania, jeśli aplikacja wymaga identyfikacji użytkownika lub ograniczeń dostępu.
+   - Upewnij się, że żadna potencjalna interakcja użytkownika nie została pominięta.
+   - Upewnij się, że każda historia użytkownika jest testowalna.
+
+Użyj następującej struktury dla każdej historii użytkownika:
+- ID
+- Tytuł
+- Opis
+- Kryteria akceptacji
+
+4. Po ukończeniu PRD przejrzyj go pod kątem tej listy kontrolnej:
+   - Czy każdą historię użytkownika można przetestować?
+   - Czy kryteria akceptacji są jasne i konkretne?
+   - Czy mamy wystarczająco dużo historyjek użytkownika, aby zbudować w pełni funkcjonalną aplikację?
+   - Czy uwzględniliśmy wymagania dotyczące uwierzytelniania i autoryzacji (jeśli dotyczy)?
+
+5. Formatowanie PRD:
+   - Zachowaj spójne formatowanie i numerację.
+   - Nie używaj pogrubionego formatowania w markdown ( ** ).
+   - Wymień WSZYSTKIE historyjki użytkownika.
+   - Sformatuj PRD w poprawnym markdown.
+
+Przygotuj PRD z następującą strukturą:
+
+```markdown
+# Dokument wymagań produktu (PRD) - {{app-name}}
+## 1. Przegląd produktu
+## 2. Problem użytkownika
+## 3. Wymagania funkcjonalne
+## 4. Granice produktu
+## 5. Historyjki użytkowników
+## 6. Metryki sukcesu
+```
+
+Pamiętaj, aby wypełnić każdą sekcję szczegółowymi, istotnymi informacjami w oparciu o opis projektu i nasze pytania wyjaśniające. Upewnij się, że PRD jest wyczerpujący, jasny i zawiera wszystkie istotne informacje potrzebne do dalszej pracy nad produktem.
+
+Ostateczny wynik powinien składać się wyłącznie z PRD zgodnego ze wskazanym formatem w markdown, który zapiszesz w pliku .ai/prd.md

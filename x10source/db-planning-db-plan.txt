@@ -1,0 +1,70 @@
+Jesteś architektem baz danych, którego zadaniem jest stworzenie schematu bazy danych Firebase Firestore na podstawie informacji dostarczonych z sesji planowania, dokumentu wymagań produktu (PRD) i stacku technologicznym. Twoim celem jest zaprojektowanie wydajnej i skalowalnej struktury bazy danych, która spełnia wymagania projektu.
+
+1. <prd>
+.ai/prd.md z kontekstu
+</prd>
+
+Jest to dokument wymagań produktu, który określa cechy, funkcjonalności i wymagania projektu.
+
+2. <session_notes>
+<conversation_summary>
+<decisions>
+Każda kampania ma jednego właściciela.
+Historia zmian kampanii nie jest przechowywana.
+Typy danych powinny dokładnie odzwierciedlać reprezentowane informacje (np. timestamp dla dat).
+Pola identyfikatorów (np. id, uuid) muszą być unikalne, a użytkownik jest identyfikowany na podstawie id z Firebase Auth.
+Każda kampania powinna mieć określoną listę grup z dostępem, przy czym każdy użytkownik może należeć do wielu grup.
+Specjalne indeksy nie są wymagane, gdyż Firebase automatycznie indeksuje pola kolekcji.
+Partycjonowanie danych nie jest planowane.
+Spójność danych zostanie zapewniona poprzez transakcje i batch writes.
+</decisions>
+<matched_recommendations>
+Zdefiniować oddzielne kolekcje dla użytkowników i kampanii, zapewniając wyraźne powiązanie między nimi.
+Egzekwować unikalność pól identyfikatorów, wykorzystując Firebase Auth do identyfikacji użytkownika.
+Wdrożyć reguły bezpieczeństwa Firestore, zarządzające dostępem do dokumentów na poziomie grup.
+Użyć batch writes i transakcji do utrzymania spójności danych.
+ </matched_recommendations>
+
+<database_planning_summary>
+    Schemat bazy danych powinien obejmować kluczowe encje, takie jak użytkownicy oraz kampanie. Każda kampania jest powiązana z jednym właścicielem i posiada określoną listę grup, co umożliwia przypisanie wielu grup do użytkowników. Typy danych należy dobrać zgodnie z reprezentowanymi informacjami (np. timestamp dla dat). Mimo że historia zmian kampanii nie jest przechowywana, ważne jest egzekwowanie unikalności identyfikatorów (np. id, uuid) z uwierzytelnianiem za pomocą Firebase Auth. System korzysta z automatycznego indeksowania pól w Firestore, co eliminuje potrzebę customowych indeksów oraz partycjonowania, a spójność danych zostanie zapewniona przez zastosowanie transakcji i batch writes.
+</database_planning_summary>
+
+<unresolved_issues>
+    Brak nierozwiązanych kwestii.
+</unresolved_issues>
+</conversation_summary>
+</session_notes>
+
+Są to notatki z sesji planowania schematu bazy danych. Mogą one zawierać ważne decyzje, rozważania i konkretne wymagania omówione podczas spotkania.
+
+3. <tech_stack>
+.ai/tech-stack.md z kontekstu
+</tech_stack>
+
+Opisuje stack technologiczny, który zostanie wykorzystany w projekcie, co może wpłynąć na decyzje dotyczące projektu bazy danych.
+
+Wykonaj następujące kroki, aby utworzyć schemat bazy danych:
+
+1. Dokładnie przeanalizuj notatki z sesji, identyfikując kluczowe jednostki, atrybuty i relacje omawiane podczas sesji planowania.
+2. Przejrzyj PRD, aby upewnić się, że wszystkie wymagane funkcje i funkcjonalności są obsługiwane przez schemat bazy danych.
+3. Przeanalizuj stack technologiczny i upewnij się, że projekt bazy danych jest zoptymalizowany pod kątem wybranych technologii.
+
+4. Stworzenie kompleksowego schematu bazy danych, który obejmuje
+   a. Dokumenty i kolekcje z odpowiednimi typami danych i kluczami np.
+      - Użytkownicy z unikalnym identyfikatorem na podstawie Firebase Auth user id
+      - Kampanie z uuid
+
+5. Zdefiniuj relacje między dokumentami, kolekcjami takie jak:
+   - Każda kampania ma jednego właściciela (użytkownika).
+   - Kampanie mogą być przypisane do wielu grup, a każdy użytkownik może należeć do wielu grup.
+
+6 Upewnij się, że schemat jest zgodny z najlepszymi praktykami projektowania firestore.
+
+Ostateczny wynik powinien mieć następującą strukturę:
+```markdown
+1. Lista tabel z ich kolumnami, typami danych i ograniczeniami
+2. Relacje między tabelami
+3. Wszelkie dodatkowe uwagi lub wyjaśnienia dotyczące decyzji projektowych
+```
+
+W odpowiedzi należy podać tylko ostateczny schemat bazy danych w formacie markdown, który zapiszesz w pliku .ai/db-plan.md bez uwzględniania procesu myślowego lub kroków pośrednich. Upewnij się, że schemat jest kompleksowy, dobrze zorganizowany i gotowy do wykorzystania jako podstawa do tworzenia migracji baz danych.

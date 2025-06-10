@@ -1,0 +1,46 @@
+# Firease initialization
+
+This document provides a reproducible guide to create the necessary file structure for integrating Firestore and Auth into project.
+
+Follow strictly the firestore database plan described in `/ai/db-plan.md`.
+
+
+## Prerequisites
+
+- Project use Vue 3,  TypeScript 5, Pinia and firebase version 11.9.1
+- Firebase dependency is already installed in project.
+- Generate all needed collection and document types in /src/db/database.types.ts file.
+- Ensure that a file `/src/db/database.types.ts` exists and contains the correct type definitions for your database.
+
+IMPORTANT: Check prerequisites before perfoming actions below. If they're not met, stop and ask a user for the fix.
+
+## File Structure and Setup
+
+### 1. Firestore Client Initialization
+
+Create the file `/src/db/firebase.client.ts` with the following content:
+
+```ts
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+
+// TODO: Replace the following with your app's Firebase project configuration
+const firebaseConfig = {
+    FIREBASE_CONFIGURATION
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+
+// Initialize Cloud Firestore and get a reference to the service
+const db = getFirestore(app);
+
+// Initialize Firebase Authentication and get a reference to the service
+const auth = getAuth(app);
+```
+
+This file initializes the Firestore and Auth client using the environment variable `VUE_FIREBASE_CONFIG`.
+
+No middleware is needed for firebase use.
+

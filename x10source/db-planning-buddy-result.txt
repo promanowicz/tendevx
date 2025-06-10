@@ -1,0 +1,26 @@
+<conversation_summary>
+<decisions>
+Każda kampania ma jednego właściciela.
+Historia zmian kampanii nie jest przechowywana.
+Typy danych powinny dokładnie odzwierciedlać reprezentowane informacje (np. timestamp dla dat).
+Pola identyfikatorów (np. id, uuid) muszą być unikalne, a użytkownik jest identyfikowany na podstawie id z Firebase Auth.
+Każda kampania powinna mieć określoną listę grup z dostępem, przy czym każdy użytkownik może należeć do wielu grup.
+Specjalne indeksy nie są wymagane, gdyż Firebase automatycznie indeksuje pola kolekcji.
+Partycjonowanie danych nie jest planowane.
+Spójność danych zostanie zapewniona poprzez transakcje i batch writes.
+</decisions>
+<matched_recommendations>
+Zdefiniować oddzielne kolekcje dla użytkowników i kampanii, zapewniając wyraźne powiązanie między nimi.
+Egzekwować unikalność pól identyfikatorów, wykorzystując Firebase Auth do identyfikacji użytkownika.
+Wdrożyć reguły bezpieczeństwa Firestore, zarządzające dostępem do dokumentów na poziomie grup.
+Użyć batch writes i transakcji do utrzymania spójności danych.
+ </matched_recommendations>
+
+<database_planning_summary>
+    Schemat bazy danych powinien obejmować kluczowe encje, takie jak użytkownicy oraz kampanie. Każda kampania jest powiązana z jednym właścicielem i posiada określoną listę grup, co umożliwia przypisanie wielu grup do użytkowników. Typy danych należy dobrać zgodnie z reprezentowanymi informacjami (np. timestamp dla dat). Mimo że historia zmian kampanii nie jest przechowywana, ważne jest egzekwowanie unikalności identyfikatorów (np. id, uuid) z uwierzytelnianiem za pomocą Firebase Auth. System korzysta z automatycznego indeksowania pól w Firestore, co eliminuje potrzebę customowych indeksów oraz partycjonowania, a spójność danych zostanie zapewniona przez zastosowanie transakcji i batch writes.
+</database_planning_summary>
+
+<unresolved_issues>
+    Brak nierozwiązanych kwestii.
+</unresolved_issues>
+</conversation_summary>
