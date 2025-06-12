@@ -134,4 +134,14 @@ const handleSubmit = async (e: Event) => {
   border-radius: 4px;
   text-align: center;
 }
+
+.page-container {
+  max-width: 900px; /* Doubled from 450px */
+  margin: 2rem auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
 </style>
