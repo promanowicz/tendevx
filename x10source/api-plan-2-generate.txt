@@ -4,12 +4,12 @@ Najpierw dokładnie przejrzyj następujące dane wejściowe:
 
 1. Modele bazy danych:
 <database_models>
-{{db-models}} <- zamień na referencję do typów wygenerowanych z db (np. @database.types.ts)
+@database.types.ts
 </database_models>
 
 2. Plan API (zawierający zdefiniowane DTO):
 <api_plan>
-{{api-plan}} <- zamień na referencję do @api-plan.md
+@api-plan.md
 </api_plan>
 
 Twoim zadaniem jest utworzenie definicji typów TypeScript dla DTO i Command Modeli określonych w planie API, upewniając się, że pochodzą one z modeli bazy danych. Wykonaj następujące kroki:
