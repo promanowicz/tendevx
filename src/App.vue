@@ -1,88 +1,127 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
-console.log('asdasd')
 
+const authStore = useAuthStore()
+const router = useRouter()
 
+onMounted(() => {
+  authStore.initialize()
+})
+
+const handleLogout = async () => {
+  await authStore.logout()
+  router.push('/login')
+}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <div class="app-container">
+    <!-- Navigation bar -->
+    <nav v-if="authStore.isAuthenticated" class="navbar">
+      <div class="nav-brand">
+        <router-link to="/">Commercial Manager</router-link>
+      </div>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+      <div class="nav-links">
+        <router-link to="/campaigns">Campaigns</router-link>
+        <router-link to="/campaigns/new">New Campaign</router-link>
+        <router-link to="/profile">Profile</router-link>
+        <button @click="handleLogout" class="logout-button">
+          Logout
+        </button>
+      </div>
+    </nav>
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+    <!-- Main content -->
+    <main :class="{ 'with-nav': authStore.isAuthenticated }">
+      <router-view v-slot="{ Component }">
+        <transition name="fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
+    </main>
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+<style>
+.app-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  z-index: 1000;
 }
 
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
+.nav-brand a {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #333;
+  text-decoration: none;
 }
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
 }
 
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
+.nav-links a {
+  color: #666;
+  text-decoration: none;
+  font-weight: 500;
 }
 
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+.nav-links a:hover,
+.nav-links a.router-link-active {
+  color: #4CAF50;
 }
 
-nav a:first-of-type {
-  border: 0;
+.logout-button {
+  background: none;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+.logout-button:hover {
+  background-color: #dc3545;
+  color: white;
+}
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+main {
+  padding: 2rem;
+}
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+main.with-nav {
+  padding-top: calc(60px + 2rem);
+}
 
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
+/* Transition animations */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
 
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
