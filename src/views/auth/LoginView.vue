@@ -73,6 +73,7 @@ const handleSubmit = async (e: Event) => {
   max-width: 400px;
   margin: 2rem auto;
   padding: 2rem;
+  color: #333; /* Added default dark color for text */
 }
 
 .login-form {
@@ -87,10 +88,16 @@ const handleSubmit = async (e: Event) => {
   gap: 0.5rem;
 }
 
+.form-group label {
+  color: #333; /* Explicit dark color for labels */
+  font-weight: 500;
+}
+
 .form-group input {
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
+  color: #333; /* Explicit dark color for input text */
 }
 
 .form-actions {
@@ -116,14 +123,14 @@ const handleSubmit = async (e: Event) => {
 }
 
 .register-link {
-  color: #666;
+  color: #555; /* Slightly lighter dark color for the link */
   text-decoration: none;
 }
 
 .error-message {
   padding: 0.75rem;
   background-color: #ffebee;
-  color: #c62828;
+  color: #c62828; /* Error messages remain red */
   border-radius: 4px;
   text-align: center;
 }

@@ -108,10 +108,16 @@ const handleLogout = async () => {
 
 main {
   padding: 2rem;
+  display: flex; /* Added */
+  justify-content: center; /* Added */
+  align-items: flex-start; /* Added to keep content at the top */
 }
 
 main.with-nav {
   padding-top: calc(60px + 2rem);
+  display: flex; /* Added */
+  justify-content: center; /* Added */
+  align-items: flex-start; /* Added to keep content at the top */
 }
 
 /* Transition animations */
