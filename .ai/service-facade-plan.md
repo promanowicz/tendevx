@@ -199,28 +199,11 @@ Provides AI-powered optimization suggestions for campaigns.
 #### Functions
 
 ```typescript
-generateTextSuggestions(campaignId: string): Promise<TextSuggestions>
+provideSuggestion(campaignId: string): Promise<string>
 ```
-- **Input**: Campaign ID
-- **Output**: `TextSuggestions` object with suggested improvements
-- **Firebase SDK**: Fetches campaign from Firestore, then calls OpenAI API
-- **Errors**: Campaign not found, unauthorized access (non-premium users), API errors, network errors
-
-```typescript
-generateImageSuggestions(campaignId: string): Promise<ImageSuggestions>
-```
-- **Input**: Campaign ID
-- **Output**: `ImageSuggestions` object with suggested improvements
-- **Firebase SDK**: Fetches campaign from Firestore, then calls OpenAI API
-- **Errors**: Campaign not found, unauthorized access (non-premium users), API errors, network errors
-
-```typescript
-applySuggestion(campaignId: string, suggestionId: string): Promise<Campaign>
-```
-- **Input**: Campaign ID and Suggestion ID
-- **Output**: Updated `Campaign` object
-- **Firebase SDK**: Updates campaign document in Firestore
-- **Errors**: Campaign not found, suggestion not found, unauthorized access, network errors
+- **Input**: Campaign ID 
+- **Output**: Text suggestion for campaign optimization
+- **Errors**: Campaign not found, suggestion not generated, unauthorized access, network errors
 
 ## 3. Authentication and Authorization
 

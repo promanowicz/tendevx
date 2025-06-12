@@ -57,3 +57,4 @@ Testowanie:
 W trakcie całego procesu implementacji należy ściśle przestrzegać dostarczonych zasad implementacji. Zasady te mają pierwszeństwo przed wszelkimi ogólnymi najlepszymi praktykami, które mogą być z nimi sprzeczne.
 
 Upewnij się, że twoja implementacja dokładnie odzwierciedla dostarczony plan implementacji i przestrzega wszystkich określonych zasad. Zwróć szczególną uwagę na strukturę serwisu, integrację z API, obsługę błędów i zabezpieczenia.
+Parametry modelu jak i prompt systemowy będą zoptymalizowane w kolejnych iteracjach, więc nie musisz się nimi teraz zajmować. Użyj domyślnych wartości.

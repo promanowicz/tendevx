@@ -18,7 +18,7 @@ export interface Campaign {
   ownerId: string; // reference to a user via Firebase Auth user id
   title: string;
   description: string;
-  groups: string[]; // references to group identifiers
+  groups: string[]; // references to group identifiers;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
