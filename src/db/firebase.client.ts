@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
 
 // TODO: Replace the following with your app's Firebase project configuration
 const firebaseConfig = {
@@ -20,5 +20,16 @@ const db = getFirestore(app);
 
 // Initialize Firebase Authentication and get a reference to the service
 const auth = getAuth(app);
+
+// Connect to emulators in development mode
+if (import.meta.env.DEV) {
+  // Connect to Firestore emulator
+  connectFirestoreEmulator(db, '127.0.0.1', 8081);
+
+  // Connect to Auth emulator
+  connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+
+  console.log('Using Firebase emulators in development mode');
+}
 
 export { db, auth };
