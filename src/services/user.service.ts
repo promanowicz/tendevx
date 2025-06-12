@@ -120,9 +120,9 @@ export class UserService {
       const docRef = doc(this.collectionRef, userId);
       const docSnap = await getDoc(docRef);
 
-      if (!docSnap.exists()) {
-        throw new Error('User profile not found');
-      }
+      // if (!docSnap.exists()) {
+      //   throw new Error('User profile not found');
+      // }
 
       return docSnap.data() as User;
     } catch (error) {
