@@ -25,24 +25,27 @@ constructor(config: {
 
 ## 3. Publiczne metody i pola
 
-### generateChatCompletion(options)
+### provideSuggestion(campaignId: string): Promise<string>
 ```typescript
-interface ChatOptions {
-  messages: ChatMessage[];            // system + user
-  functions?: OpenAIFunction[];       // opcjonalne funkcje do wywołania
-  model?: string;
-  temperature?: number;
-  top_p?: number;
+async provideSuggestion(campaignId: string): Promise<string> {
+  const aiResponse = await this.generateChatCompletion({
+    messages: [
+      { role: 'system', content: 'You are a marketing expert AI assisting with campaign optimization.' },
+      { role: 'user', content: `Provide optimization suggestions for campaign ${campaignId}.` }
+    ],
+    functions: [
+      {
+        name: 'provideSuggestion',
+        description: 'Generates AI suggestions for campaign optimization',
+        parameters: {
+          campaignId: { type: 'string', description: 'ID of the campaign' }
+        }
+      }
+    ]
+  });
+  return typeof aiResponse === 'string' ? aiResponse : aiResponse.content;
 }
-
-async generateChatCompletion(options: ChatOptions): Promise<any>;
 ```
-- Buduje payload API: messages, functions, model, params.
-- Wywołuje `private callOpenAI()`.
-- Zwraca odpowiedź sparsowaną jako JSON lub raw text.
-
-### getSupportedModels(): Promise<string[]>
-- Zwraca listę dostępnych modeli (cache).
 
 ## 4. Prywatne metody i pola
 
@@ -91,38 +94,27 @@ async generateChatCompletion(options: ChatOptions): Promise<any>;
 
 4. Implementacja konstruktora i metod:
    - Zainicjalizuj `OpenAIApi` z `apiKey`.
-   - Dodaj metody publiczne (`generateChatCompletion`, `getSupportedModels`).
+   - Dodaj metody publiczne (`provideSuggestion`, `getSupportedModels`).
    - Dodaj prywatne pomocnicze (`callOpenAI`, `formatMessages`).
 
-5. Definicja typów:
-   - W `src/services/types.ts` dodaj:
-     ```typescript
-     type ChatMessage = { role: 'system' | 'user' | 'assistant'; content: string };
-     interface OpenAIFunction {
-       name: string;
-       description: string;
-       parameters: Record<string, any>;
-     }
-     ```
+5. Konfiguracja wiadomości:
+  - System messages: pierwsza wiadomość z instrukcjami.
+  - User messages: zbierane od użytkownika.
+  - Opcjonalne `functions`: zadeklaruj w kodzie jako JS schema.
 
-6. Konfiguracja wiadomości:
-   - System messages: pierwsza wiadomość z instrukcjami.
-   - User messages: zbierane od użytkownika.
-   - Opcjonalne `functions`: zadeklaruj w kodzie jako JS schema.
-
-7. Parsowanie odpowiedzi:
+6. Parsowanie odpowiedzi:
    - Użyj `response_format: 'json'` w parametrach funkcji (jeśli wymagane).
    - W `validateResponse` wyodrębnij `function_call` i `content`.
 
-8. Integracja w komponencie Vue:
+7. Integracja w komponencie Vue:
    - Importuj `AIService` w composable `useCampaign.ts`.
-   - Wywołuj `generateChatCompletion` przy wysyłce czatu.
+   - Wywołuj `provideSuggestion` przy wysyłce czatu.
 
-9. Testowanie:
+8. Testowanie:
    - Unit testy metod serwisu (Vitest).
    - Mockuj OpenAI API.
 
-10. Wdrażanie:
+9. Wdrażanie:
     - Zbuduj projekt: `npm run build`.
     - Deploy na Firebase Hosting / Functions.
 
@@ -131,19 +123,6 @@ async generateChatCompletion(options: ChatOptions): Promise<any>;
 **Przykładowe użycie**:
 ```typescript
 const ai = new AIService({ apiKey: import.meta.env.VITE_OPENAI_API_KEY, defaultModel: 'gpt-3.5-turbo' });
-const response = await ai.generateChatCompletion({
-  messages: [
-    { role: 'system', content: 'Jesteś pomocnym asystentem.' },
-    { role: 'user', content: 'Podaj plan wdrożenia.' }
-  ],
-  functions: [
-    {
-      name: 'getCampaignStats',
-      description: 'Pobiera statystyki kampanii',
-      parameters: { campaignId: 'string' }
-    }
-  ],
-  temperature: 0.7
-});
-console.log(response);
+const suggestion = await ai.provideSuggestion('campaign123');
+console.log(suggestion);
 ```
