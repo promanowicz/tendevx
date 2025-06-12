@@ -2,15 +2,10 @@ Twoim zadaniem jest zaimplementowanie serwisu w oparciu o podany plan implementa
 
 Najpierw przejrzyj plan implementacji:
 <implementation_plan>
-{{implementation-plan}} <- zamień na referencję do planu implementacji serwisu
-
-Utwórz serwis w {{sciezka}}
+@openai-service-implementation-plan.md
+Utwórz serwis w src/services/openrouter-service.ts
 </implementation_plan>
 
-Teraz przejrzyj zasady implementacji:
-<implementation_rules>
-{{backend-rules}} <- zamień na referencję do reguł przydatnych dla serwisu (np. shared.mdc)
-</implementation_rules>
 
 Wdrażaj plan zgodnie z następującym podejściem:
 <implementation_approach>
