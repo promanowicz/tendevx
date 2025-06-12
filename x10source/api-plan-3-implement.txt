@@ -4,34 +4,13 @@ Twoim zadaniem jest wdrożenie usługi Firebase w oparciu o podany plan wdrożen
 Najpierw dokładnie przejrzyj dostarczony plan wdrożenia:
 
 <implementation_plan>
-{{firebase-implementation-plan}} <- dodaj referencję do planu implementacji funkcjonalności
+@api-plan.md
 </implementation_plan>
 
 <types>
-Campaign:
-- uuid: string // unikalny identyfikator kampanii
-- ownerId: string // referencja do użytkownika (Firebase Auth user id)
-- title: string
-- description: string
-- groups: string[] // referencje do identyfikatorów grup
-- createdAt: Timestamp
-- updatedAt: Timestamp
-
-User:
-- id: string // Firebase Auth user id
-- name: string
-- email: string
-- groups: string[] // referencje do identyfikatorów grup
-
-Group:
-- id: string // unikalny identyfikator grupy
-- name: string
-- description?: string // opcjonalne
+@database.types.ts
 </types>
 
-<implementation_rules>
-{{firebase-rules}} <- dodaj referencje do reguł Firebase
-</implementation_rules>
 
 <implementation_approach>
 Realizuj maksymalnie 3 kroki planu implementacji, podsumuj krótko co zrobiłeś i opisz plan na 3 kolejne działania - zatrzymaj w tym momencie pracę i czekaj na mój feedback.
