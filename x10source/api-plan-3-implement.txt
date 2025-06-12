@@ -1,57 +1,132 @@
-Twoim zadaniem jest wdrożenie endpointa interfejsu API REST w oparciu o podany plan wdrożenia. Twoim celem jest stworzenie solidnej i dobrze zorganizowanej implementacji, która zawiera odpowiednią walidację, obsługę błędów i podąża za wszystkimi logicznymi krokami opisanymi w planie.
+```
+Twoim zadaniem jest wdrożenie usługi Firebase w oparciu o podany plan wdrożenia. Twoim celem jest stworzenie solidnej i dobrze zorganizowanej implementacji, która zawiera odpowiednią walidację, obsługę błędów i podąża za wszystkimi logicznymi krokami opisanymi w planie.
 
 Najpierw dokładnie przejrzyj dostarczony plan wdrożenia:
 
 <implementation_plan>
-{{endpoint-implementation-plan}} <- dodaj referencję do planu implementacji endpointa (np. @generations-endpoint-implementation-plan.md)
+{{firebase-implementation-plan}} <- dodaj referencję do planu implementacji funkcjonalności
 </implementation_plan>
 
 <types>
-{{types}} <- dodaj referencje do definicji typów (np. @types)
+Campaign:
+- uuid: string // unikalny identyfikator kampanii
+- ownerId: string // referencja do użytkownika (Firebase Auth user id)
+- title: string
+- description: string
+- groups: string[] // referencje do identyfikatorów grup
+- createdAt: Timestamp
+- updatedAt: Timestamp
+
+User:
+- id: string // Firebase Auth user id
+- name: string
+- email: string
+- groups: string[] // referencje do identyfikatorów grup
+
+Group:
+- id: string // unikalny identyfikator grupy
+- name: string
+- description?: string // opcjonalne
 </types>
 
 <implementation_rules>
-{{backend-rules}} <- dodaj referencje do reguł backendowych (np. @shared.mdc, @backend.mdc, @astro.mdc)
+{{firebase-rules}} <- dodaj referencje do reguł Firebase
 </implementation_rules>
 
 <implementation_approach>
 Realizuj maksymalnie 3 kroki planu implementacji, podsumuj krótko co zrobiłeś i opisz plan na 3 kolejne działania - zatrzymaj w tym momencie pracę i czekaj na mój feedback.
 </implementation_approach>
 
-Teraz wykonaj następujące kroki, aby zaimplementować punkt końcowy interfejsu API REST:
+Wykonaj następujące kroki, aby zaimplementować usługę Firebase:
 
 1. Przeanalizuj plan wdrożenia:
-   - Określ metodę HTTP (GET, POST, PUT, DELETE itp.) dla punktu końcowego.
-   - Określenie struktury adresu URL punktu końcowego
-   - Lista wszystkich oczekiwanych parametrów wejściowych
-   - Zrozumienie wymaganej logiki biznesowej i etapów przetwarzania danych
-   - Zwróć uwagę na wszelkie szczególne wymagania dotyczące walidacji lub obsługi błędów.
+   - Określ typ operacji Firebase (np. addDoc, getDoc, updateDoc, deleteDoc)
+   - Zidentyfikuj kolekcje Firestore ('users', 'campaigns', 'groups')
+   - Określ wymagane relacje między dokumentami (np. referencje groups w Campaign)
+   - Zrozumienie wymaganej logiki biznesowej i zabezpieczeń
+   - Zwróć uwagę na aspekty związane z autentykacją Firebase
 
 2. Rozpocznij implementację:
-   - Rozpocznij od zdefiniowania funkcji punktu końcowego z prawidłowym dekoratorem metody HTTP.
-   - Skonfiguruj parametry funkcji w oparciu o oczekiwane dane wejściowe
-   - Wdrożenie walidacji danych wejściowych dla wszystkich parametrów
-   - Postępuj zgodnie z logicznymi krokami opisanymi w planie wdrożenia
-   - Wdrożenie obsługi błędów dla każdego etapu procesu
-   - Zapewnienie właściwego przetwarzania i transformacji danych zgodnie z wymaganiami
-   - Przygotowanie struktury danych odpowiedzi
+   - Zdefiniuj funkcję serwisową z odpowiednimi typami Firebase
+   - Użyj poprawnych typów z database.types.ts
+   - Zaimplementuj walidację danych wejściowych
+   - Postępuj zgodnie z krokami z planu implementacji
+   - Dodaj obsługę błędów Firebase
+   - Implementuj odpowiednie operacje Firestore
+   - Zachowaj spójność timestampów (createdAt, updatedAt)
 
-3. Walidacja i obsługa błędów:
-   - Wdrożenie dokładnej walidacji danych wejściowych dla wszystkich parametrów
-   - Używanie odpowiednich kodów statusu HTTP dla różnych scenariuszy (np. 400 dla błędnych żądań, 404 dla nie znaleziono, 500 dla błędów serwera).
-   - Dostarczanie jasnych i informacyjnych komunikatów o błędach w odpowiedzi.
-   - Obsługa potencjalnych wyjątków, które mogą wystąpić podczas przetwarzania.
+3. Implementacja bezpieczeństwa:
+   - Wykorzystaj Firebase Auth do weryfikacji użytkowników
+   - Sprawdź uprawnienia do grup
+   - Zweryfikuj relacje między dokumentami
+   - Zaimplementuj reguły bezpieczeństwa Firestore
 
-4. Rozważania dotyczące testowania:
-   - Należy rozważyć edge case'y i potencjalne problemy, które powinny zostać przetestowane.
-   - Upewnienie się, że wdrożenie obejmuje wszystkie scenariusze wymienione w planie.
+4. Transakcje i spójność danych:
+   - Użyj transakcji Firestore dla operacji wielodokumentowych
+   - Zapewnij atomowość operacji na powiązanych dokumentach
+   - Zaimplementuj walidację referencji między dokumentami
+   - Zachowaj spójność przy usuwaniu (np. aktualizacja groups)
 
-5. Dokumentacja:
-   - Dodaj jasne komentarze, aby wyjaśnić złożoną logikę lub ważne decyzje
-   - Dołącz dokumentację dla głównej funkcji i wszelkich funkcji pomocniczych.
+5. Optymalizacja wydajności:
+   - Zoptymalizuj zapytania Firestore
+   - Użyj where() i limit() do filtrowania
+   - Zastosuj indeksy dla często używanych zapytań
+   - Zaimplementuj stronicowanie dla dużych kolekcji
 
-Po zakończeniu implementacji upewnij się, że zawiera wszystkie niezbędne importy, definicje funkcji i wszelkie dodatkowe funkcje pomocnicze lub klasy wymagane do implementacji.
+6. Implementacja obsługi błędów:
+   - Obsłuż specyficzne błędy Firebase (FirebaseError)
+   - Zaimplementuj retry logic dla operacji sieciowych
+   - Dodaj odpowiednie komunikaty błędów
+   - Zachowaj spójność danych przy błędach
 
-Jeśli musisz przyjąć jakieś założenia lub masz jakiekolwiek pytania dotyczące planu implementacji, przedstaw je przed pisaniem kodu.
+7. Integracja z Vue.js:
+   - Użyj composables dla logiki Firebase
+   - Zaimplementuj reaktywne zapytania
+   - Dodaj odpowiednią obsługę stanu ładowania
+   - Zintegruj z Pinia store
 
-Pamiętaj, aby przestrzegać najlepszych praktyk projektowania REST API, stosować się do wytycznych dotyczących stylu języka programowania i upewnić się, że kod jest czysty, czytelny i dobrze zorganizowany.
+8. Dokumentacja:
+   - Dodaj komentarze JSDoc dla funkcji
+   - Opisz założenia bezpieczeństwa
+   - Udokumentuj strukturę kolekcji
+   - Wyjaśnij wzorce dostępu do danych
+
+Po zakończeniu implementacji upewnij się, że:
+- Kod jest zgodny z TypeScript i Vue.js 3
+- Wszystkie operacje są typowane
+- Zaimplementowano odpowiednią obsługę błędów
+- Kod jest zoptymalizowany pod kątem wydajności
+- Dokumentacja jest kompletna i aktualna
+
+Przykład implementacji operacji w Firebase:
+
+```typescript
+import { db } from '@/db/firebase.client'
+import { collection, addDoc, Timestamp } from 'firebase/firestore'
+import type { Campaign } from '@/db/database.types'
+
+async function createCampaign(campaignData: Omit<Campaign, 'uuid' | 'createdAt' | 'updatedAt'>) {
+  const timestamp = Timestamp.now()
+  
+  const campaign: Omit<Campaign, 'uuid'> = {
+    ...campaignData,
+    createdAt: timestamp,
+    updatedAt: timestamp
+  }
+  
+  const docRef = await addDoc(collection(db, 'campaigns'), campaign)
+  return {
+    uuid: docRef.id,
+    ...campaign
+  }
+}
+```
+
+Pamiętaj o:
+- Używaniu typów z database.types.ts
+- Zachowaniu spójności timestampów
+- Poprawnym zarządzaniu referencjami dokumentów
+- Implementacji odpowiednich reguł bezpieczeństwa
+- Optymalizacji zapytań
+- Właściwej obsłudze błędów Firebase
+```
