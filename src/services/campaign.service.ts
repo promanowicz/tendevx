@@ -4,12 +4,10 @@ import {
   doc,
   getDoc,
   updateDoc,
-  deleteDoc,
   query,
   where,
   getDocs,
   Timestamp,
-  DocumentReference
 } from 'firebase/firestore';
 import { db } from '@/db/firebase.client';
 import type { Campaign } from '@/db/database.types';
@@ -119,7 +117,6 @@ export class CampaignService {
       await updateDoc(docRef, updateData);
 
       return {
-        uuid,
         ...campaign,
         ...updateData
       };

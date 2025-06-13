@@ -5,7 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2451a9a1-f6ce-4c16-ab06-7461487bbba3" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/master.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/master.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/router/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/campaign.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/campaign.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/stores/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/stores/auth.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/views/campaigns/CampaignCreateView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/campaigns/CampaignCreateView.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,7 +79,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1749829169156</updated>
-      <workItem from="1749829170225" duration="2245000" />
+      <workItem from="1749829170225" duration="2728000" />
     </task>
     <servers />
   </component>

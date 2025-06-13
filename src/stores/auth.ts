@@ -63,7 +63,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null;
 
     try {
-      const user = await userService.register(email, password, { name, groups: [] });
+      const user = await userService.register(email, password, { email, name, groups: [] });
       userProfile.value = user;
     } catch (e) {
       error.value = (e as Error).message;

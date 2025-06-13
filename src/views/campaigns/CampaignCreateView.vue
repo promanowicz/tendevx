@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useCampaign } from '@/composables/useCampaign'
 import { useAuthStore } from '@/stores/auth'
 import { OpenRouterService } from '@/services/openrouter-service'
+import { Timestamp } from 'firebase/firestore'
 
 const router = useRouter()
 const { createCampaign, error: campaignError } = useCampaign()
@@ -45,8 +46,8 @@ const requestAiSuggestions = async (type: 'title' | 'description') => {
       description: type === 'description' ? description.value : '',
       ownerId: authStore.userId!,
       groups: groups.value,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now()
     }
 
     const suggestions = await openRouter.provideSuggestion(campaign)
