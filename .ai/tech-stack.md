@@ -1,5 +1,5 @@
 Frontend - VueJS 3, pinia vue-router
-
+    Testy vitest i playwright
 Backend - Firebase jako kompleksowe rozwiązanie backendowe:
 - Zapewnia bazę danych Firestore
 - Posiada wbudowaną autentykację użytkowników
