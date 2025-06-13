@@ -3,16 +3,79 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCampaign } from '@/composables/useCampaign'
 import { useAuthStore } from '@/stores/auth'
+import { OpenRouterService } from '@/services/openrouter-service'
 
 const router = useRouter()
 const { createCampaign, error: campaignError } = useCampaign()
 const authStore = useAuthStore()
 
+// Existing refs
 const title = ref('')
 const description = ref('')
 const groups = ref<string[]>([])
 const newGroup = ref('')
 const error = ref('')
+
+// New refs for AI suggestions
+const showSuggestions = ref(false)
+const aiSuggestions = ref('')
+const isLoadingSuggestions = ref(false)
+const suggestionType = ref<'title' | 'description'>('title')
+const suggestionOriginalValue = ref('')
+
+// Initialize OpenRouter service
+const openRouter = new OpenRouterService({
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY || ''
+})
+
+const requestAiSuggestions = async (type: 'title' | 'description') => {
+  suggestionType.value = type
+  suggestionOriginalValue.value = type === 'title' ? title.value : description.value
+
+  if (!suggestionOriginalValue.value.trim()) {
+    error.value = `Please enter some ${type} text first`
+    return
+  }
+
+  try {
+    isLoadingSuggestions.value = true
+    const campaign = {
+      uuid: 'draft',
+      title: type === 'title' ? title.value : '',
+      description: type === 'description' ? description.value : '',
+      ownerId: authStore.userId!,
+      groups: groups.value,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+
+    const suggestions = await openRouter.provideSuggestion(campaign)
+    // Extract the relevant part from AI response
+    const improvedText = suggestions.split('\n').find(line =>
+      line.toLowerCase().includes(type.toLowerCase() + ':')
+    )?.split(':')[1]?.trim() || suggestions.trim()
+
+    aiSuggestions.value = improvedText
+    showSuggestions.value = true
+  } catch (e) {
+    error.value = (e as Error).message
+  } finally {
+    isLoadingSuggestions.value = false
+  }
+}
+
+const applySuggestions = () => {
+  if (suggestionType.value === 'title') {
+    title.value = aiSuggestions.value
+  } else {
+    description.value = aiSuggestions.value
+  }
+  showSuggestions.value = false
+}
+
+const rejectSuggestions = () => {
+  showSuggestions.value = false
+}
 
 const addGroup = () => {
   if (!newGroup.value.trim()) return
@@ -61,23 +124,43 @@ const handleSubmit = async (e: Event) => {
 
       <div class="form-group">
         <label for="title">Campaign Title</label>
-        <input
-          id="title"
-          v-model="title"
-          type="text"
-          required
-          placeholder="Enter campaign title"
-        >
+        <div class="input-with-magic">
+          <input
+            id="title"
+            v-model="title"
+            type="text"
+            required
+            placeholder="Enter campaign title"
+          >
+<!--          <button-->
+<!--            type="button"-->
+<!--            class="magic-button"-->
+<!--            @click="requestAiSuggestions('title')"-->
+<!--            :disabled="isLoadingSuggestions"-->
+<!--          >-->
+<!--            ✨-->
+<!--          </button>-->
+        </div>
       </div>
 
       <div class="form-group">
         <label for="description">Description</label>
-        <textarea
-          id="description"
-          v-model="description"
-          rows="4"
-          placeholder="Enter campaign description"
-        ></textarea>
+        <div class="input-with-magic">
+          <textarea
+            id="description"
+            v-model="description"
+            rows="4"
+            placeholder="Enter campaign description"
+          ></textarea>
+          <button
+            type="button"
+            class="magic-button"
+            @click="requestAiSuggestions('description')"
+            :disabled="isLoadingSuggestions"
+          >
+            ✨
+          </button>
+        </div>
       </div>
 
       <div class="form-group">
@@ -123,6 +206,31 @@ const handleSubmit = async (e: Event) => {
         </button>
       </div>
     </form>
+
+    <!-- AI Suggestions Dialog -->
+    <div v-if="showSuggestions" class="suggestions-overlay">
+      <div class="suggestions-dialog">
+        <h3>AI Suggestions</h3>
+        <div class="suggestions-content">
+          <div class="original-text">
+            <h4>Original {{ suggestionType }}</h4>
+            <p>{{ suggestionOriginalValue }}</p>
+          </div>
+          <div class="suggested-text">
+            <h4>Suggested {{ suggestionType }}</h4>
+            <p>{{ aiSuggestions }}</p>
+          </div>
+        </div>
+        <div class="suggestions-actions">
+          <button @click="rejectSuggestions" class="reject-button">
+            Reject
+          </button>
+          <button @click="applySuggestions" class="apply-button">
+            Apply Changes
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -236,5 +344,111 @@ const handleSubmit = async (e: Event) => {
   padding: 1rem;
   border-radius: 4px;
   margin-bottom: 1.5rem;
+}
+
+.input-with-magic {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.input-with-magic input,
+.input-with-magic textarea {
+  flex: 1;
+}
+
+.magic-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  line-height: 1;
+}
+
+.magic-button:hover {
+  transform: scale(1.1);
+  background-color: #f0f0f0;
+}
+
+.magic-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.suggestions-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.suggestions-dialog {
+  background-color: white;
+  border-radius: 8px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.suggestions-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 1.5rem 0;
+}
+
+.original-text,
+.suggested-text {
+  background-color: #f5f5f5;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.suggestions-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.reject-button,
+.apply-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.reject-button {
+  background: none;
+  border: 1px solid #666;
+  color: #666;
+}
+
+.apply-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+}
+
+.suggestions-dialog h3 {
+  margin: 0 0 1rem;
+  color: #333;
+}
+
+.suggestions-dialog h4 {
+  margin: 0 0 0.5rem;
+  color: #666;
 }
 </style>

@@ -1,5 +1,4 @@
-import { Configuration, OpenAIApi, ChatCompletionRequestMessage } from 'openai';
-import type { CreateChatCompletionRequest } from 'openai';
+import OpenAI from 'openai';
 import type { Campaign } from '@/db/database.types';
 
 // Typy wiadomości dla usługi
@@ -7,8 +6,6 @@ export type ChatMessage = {
   role: 'system' | 'user' | 'assistant';
   content: string;
 };
-
-export type OpenAIMessage = ChatCompletionRequestMessage;
 
 // Parametry domyślne dla wywołań
 export interface DefaultParams {
@@ -24,70 +21,71 @@ export interface OpenRouterServiceConfig {
 }
 
 export class OpenRouterService {
-  private apiKey: string;
+  private apiKey: string = import.meta.env.VITE_OPENAI_API_KEY;
   private defaultModel: string;
   private defaultParams: DefaultParams;
-  private openai: OpenAIApi;
-  private apiUrl = 'https://api.openai.com/v1/chat/completions';
+  private openai: OpenAI;
   private static readonly MAX_TOKENS = 1000;
 
-  constructor(config: OpenRouterServiceConfig) {
-    this.apiKey = config.apiKey;
-    this.defaultModel = config.defaultModel || 'gpt-3.5-turbo';
-    this.defaultParams = config.defaultParams || {};
+  constructor(config?: OpenRouterServiceConfig) {
+    // Use provided apiKey or fallback to env var
+    this.apiKey = config?.apiKey || import.meta.env.VITE_OPENAI_API_KEY;
+    this.defaultModel = config?.defaultModel || 'gpt-3.5-turbo';
+    this.defaultParams = config?.defaultParams || {};
 
-    const configuration = new Configuration({ apiKey: this.apiKey });
-    this.openai = new OpenAIApi(configuration);
+    this.openai = new OpenAI({ apiKey: this.apiKey, dangerouslyAllowBrowser:true});
   }
 
   public async provideSuggestion(campaign: Campaign): Promise<string> {
-    if (!campaign?.uuid?.trim()) {
+    if (!campaign?.uuid) {
       throw new Error('Invalid campaign');
     }
-    const campaignId = campaign.uuid;
-    let messages: ChatMessage[] = [
-      { role: 'system', content: 'You are a marketing expert AI assisting with campaign optimization.' },
-      { role: 'user', content: `Provide optimization suggestions for campaign ${campaignId}.` }
-    ];
-    // sanitize and trim messages
-    messages = this.sanitizeMessages(messages);
-    const functions = [
+
+    const messages: ChatMessage[] = [
       {
-        name: 'provideSuggestion',
-        description: 'Generates AI suggestions for campaign optimization',
-        parameters: { campaignId: { type: 'string', description: 'ID of the campaign' } }
+        role: 'system',
+        content: 'You are a marketing expert AI. Analyze the provided campaign content and suggest improvements. Focus on making the content more engaging, persuasive, and effective for marketing purposes. Provide specific suggestions while maintaining the original message\'s intent.'
+      },
+      {
+        role: 'user',
+        content: `Please analyze and suggest improvements for this marketing campaign:
+        Title: ${campaign.title || ''}
+        Description: ${campaign.description || ''}
+        Target Groups: ${campaign.groups?.join(', ') || 'No specific groups'}
+        
+        Please provide improved version of the text I'm currently editing.`
       }
     ];
-    const payload: CreateChatCompletionRequest = {
+
+    const sanitizedMessages = this.sanitizeMessages(messages);
+    const payload = {
       model: this.defaultModel,
-      messages: this.formatMessages(messages),
-      functions,
-      ...this.defaultParams
+      messages: this.formatMessages(sanitizedMessages),
+      temperature: 0.7,
+      max_tokens: OpenRouterService.MAX_TOKENS
     };
-    // enforce hard cap on tokens
-    payload.max_tokens = Math.min(payload.max_tokens ?? OpenRouterService.MAX_TOKENS, OpenRouterService.MAX_TOKENS);
+
     const response = await this.callOpenAI(payload);
-    const valid = this.validateResponse(response);
-    return typeof valid === 'string' ? valid : valid.content;
+    const suggestion = this.validateResponse(response);
+    return typeof suggestion === 'string' ? suggestion : suggestion.content;
   }
 
   public async getSupportedModels(): Promise<string[]> {
     try {
-      const res = await this.openai.listModels();
-      return res.data.data.map(model => model.id);
+      const res = await this.openai.models.list();
+      return res.data.map(model => model.id);
     } catch (error: any) {
       throw new Error(`Failed to fetch models: ${error.message}`);
     }
   }
 
-  private async callOpenAI(payload: CreateChatCompletionRequest): Promise<any> {
+  private async callOpenAI(payload: any): Promise<any> {
     const maxRetries = 3;
     let attempt = 0;
     let delay = 1000;
     while (true) {
       try {
-        const res = await this.openai.createChatCompletion(payload);
-        return res.data;
+        return await this.openai.chat.completions.create(payload);
       } catch (error: any) {
         const status = error.response?.status;
         const isNetwork = !error.response;
@@ -104,7 +102,7 @@ export class OpenRouterService {
     }
   }
 
-  private formatMessages(messages: ChatMessage[]): OpenAIMessage[] {
+  private formatMessages(messages: ChatMessage[]): any[] {
     return messages.map(msg => ({ role: msg.role, content: msg.content }));
   }
 
