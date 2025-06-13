@@ -49,6 +49,7 @@ const handleLogout = async () => {
 <style>
 .app-container {
   min-height: 100vh;
+  width: 100%;
   background-color: #f5f5f5;
 }
 

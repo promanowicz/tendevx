@@ -119,7 +119,7 @@ const handlePasswordChange = async () => {
 
 <style scoped>
 .profile-container {
-  max-width: 600px;
+  width: 80%;
   margin: 0 auto;
 }
 

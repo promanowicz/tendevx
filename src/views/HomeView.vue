@@ -61,7 +61,7 @@ const navigateToNewCampaign = () => {
 
 <style scoped>
 .home-container {
-  max-width: 1200px;
+  width: 80%;
   margin: 0 auto;
 }
 

@@ -66,7 +66,7 @@ const navigateToDetails = (uuid: string) => {
 
 <style scoped>
 .campaigns-container {
-  max-width: 1200px;
+  width: 80%;
   margin: 0 auto;
 }
 

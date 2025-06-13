@@ -70,7 +70,7 @@ const handleSubmit = async (e: Event) => {
 
 <style scoped>
 .login-container {
-  max-width: 400px;
+  max-width: 80%;
   margin: 2rem auto;
   padding: 2rem;
   color: #333; /* Added default dark color for text */
@@ -136,7 +136,7 @@ const handleSubmit = async (e: Event) => {
 }
 
 .page-container {
-  max-width: 900px; /* Doubled from 450px */
+  max-width: 50%; /* Doubled from 450px */
   margin: 2rem auto;
   padding: 2rem;
   display: flex;

@@ -128,7 +128,7 @@ const handleSubmit = async (e: Event) => {
 
 <style scoped>
 .create-campaign-container {
-  max-width: 800px;
+  width: 80%;
   margin: 0 auto;
 }
 
