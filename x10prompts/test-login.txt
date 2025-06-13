@@ -1,0 +1,7 @@
+Przygotujmy testy dla scenariusza
+1. Login View
+2. Uzytkownik wpisuje poprawny adres email test@test.test
+3. Użytkownik wpisuje hasło testtesttest
+4. Ponieważ takiego użytkownika nie ma w bazie, na ekranie powinnien wyświetlić się komunikat błędu "Failed to sign in".
+
+Sprawdź czy wymagane komonenty mają zdefiniowane data-testid w odpowiednich miejscach.

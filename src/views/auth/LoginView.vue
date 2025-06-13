@@ -26,11 +26,11 @@ const handleSubmit = async (e: Event) => {
 </script>
 
 <template>
-  <div class="login-container">
+  <div class="login-container" data-testid="login-container">
     <h1>Login</h1>
 
-    <form @submit="handleSubmit" class="login-form">
-      <div v-if="errorMessage" class="error-message">
+    <form @submit="handleSubmit" class="login-form" data-testid="login-form">
+      <div v-if="errorMessage" class="error-message" data-testid="error-message">
         {{ errorMessage }}
       </div>
 
@@ -42,6 +42,7 @@ const handleSubmit = async (e: Event) => {
           v-model="email"
           required
           autocomplete="email"
+          data-testid="email-input"
         >
       </div>
 
@@ -53,14 +54,15 @@ const handleSubmit = async (e: Event) => {
           v-model="password"
           required
           autocomplete="current-password"
+          data-testid="password-input"
         >
       </div>
 
       <div class="form-actions">
-        <button type="submit" :disabled="authStore.isLoading">
+        <button type="submit" :disabled="authStore.isLoading" data-testid="submit-button">
           {{ authStore.isLoading ? 'Logging in...' : 'Login' }}
         </button>
-        <router-link to="/register" class="register-link">
+        <router-link to="/register" class="register-link" data-testid="register-link">
           Don't have an account? Register
         </router-link>
       </div>
