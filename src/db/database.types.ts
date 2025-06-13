@@ -21,6 +21,7 @@ export interface Campaign {
   groups: string[]; // references to group identifiers;
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  isDeleted?: boolean; // optional, for soft deletion
 }
 
 /**

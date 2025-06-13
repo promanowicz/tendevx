@@ -22,7 +22,8 @@ export function useCampaign() {
     error.value = null;
 
     try {
-      campaigns.value = await campaignService.getUserCampaigns(authStore.userId);
+      const allCampaigns = await campaignService.getUserCampaigns(authStore.userId);
+      campaigns.value = allCampaigns.filter(c => !c.isDeleted);
     } catch (e) {
       error.value = (e as Error).message;
       throw e;
@@ -95,17 +96,38 @@ export function useCampaign() {
     }
   }
 
+  async function deleteCampaign(uuid: string) {
+    if (!authStore.userId) {
+      throw new Error('User not authenticated');
+    }
+    isLoading.value = true;
+    error.value = null;
+    try {
+      await campaignService.deleteCampaign(uuid, authStore.userId);
+      // Remove from campaigns list
+      campaigns.value = campaigns.value.filter(c => c.uuid !== uuid);
+      if (currentCampaign.value?.uuid === uuid) {
+        currentCampaign.value = null;
+      }
+    } catch (e) {
+      error.value = (e as Error).message;
+      throw e;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   return {
     // State
     campaigns,
     currentCampaign,
     isLoading,
     error,
-
     // Methods
     fetchUserCampaigns,
     getCampaign,
     createCampaign,
-    updateCampaign
+    updateCampaign,
+    deleteCampaign,
   };
 }

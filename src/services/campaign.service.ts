@@ -155,4 +155,34 @@ export class CampaignService {
       );
     }
   }
+
+  /**
+   * Soft deletes a campaign by setting isDeleted to true
+   * @param uuid Campaign UUID
+   * @param userId Current user's ID
+   * @throws FirebaseError if update fails or campaign not found
+   */
+  async deleteCampaign(uuid: string, userId: string): Promise<void> {
+    try {
+      const docRef = doc(this.collectionRef, uuid);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        throw new Error('Campaign not found');
+      }
+      const data = docSnap.data();
+      if (data.ownerId !== userId) {
+        throw new Error('You are not authorized to delete this campaign');
+      }
+      await updateDoc(docRef, {
+        isDeleted: true,
+        updatedAt: Timestamp.now(),
+      });
+    } catch (error) {
+      throw new FirebaseError(
+        'Failed to delete campaign',
+        'campaign/delete-failed',
+        error as Error
+      );
+    }
+  }
 }

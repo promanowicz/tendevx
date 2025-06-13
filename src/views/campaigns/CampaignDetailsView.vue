@@ -7,7 +7,7 @@ import { useAuthStore } from '@/stores/auth'
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
-const { getCampaign, updateCampaign, error: campaignError } = useCampaign()
+const { getCampaign, updateCampaign, deleteCampaign, error: campaignError } = useCampaign()
 
 const isEditing = ref(false)
 const campaign = ref<any>(null)
@@ -18,6 +18,10 @@ const title = ref('')
 const description = ref('')
 const groups = ref<string[]>([])
 const newGroup = ref('')
+
+// Delete dialog state
+const showDeleteConfirm = ref(false)
+const isDeleting = ref(false)
 
 onMounted(async () => {
   const campaignId = route.params.id as string
@@ -84,6 +88,21 @@ const handleSubmit = async (e: Event) => {
     isEditing.value = false
   } catch (e) {
     error.value = (e as Error).message
+  }
+}
+
+const handleDelete = async () => {
+  if (!campaign.value) return
+  isDeleting.value = true
+  error.value = ''
+  try {
+    await deleteCampaign(campaign.value.uuid)
+    showDeleteConfirm.value = false
+    router.push('/campaigns')
+  } catch (e) {
+    error.value = (e as Error).message
+  } finally {
+    isDeleting.value = false
   }
 }
 </script>
@@ -160,6 +179,9 @@ const handleSubmit = async (e: Event) => {
           </div>
 
           <div class="form-actions">
+            <button type="button" @click="showDeleteConfirm = true" class="delete-button">
+              Delete Campaign
+            </button>
             <button type="button" @click="toggleEdit" class="cancel-button">
               Cancel
             </button>
@@ -168,6 +190,25 @@ const handleSubmit = async (e: Event) => {
             </button>
           </div>
         </form>
+        <div v-if="showDeleteConfirm" class="delete-confirmation">
+          <p>Are you sure you want to delete this campaign?</p>
+          <div class="confirm-actions">
+            <button
+              @click="handleDelete"
+              class="confirm-delete-button"
+              :disabled="isDeleting"
+            >
+              <span v-if="isDeleting" class="loader"></span>
+              Delete Campaign
+            </button>
+            <button
+              @click="showDeleteConfirm = false"
+              class="cancel-delete-button"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       </div>
 
       <div v-if="!isEditing" class="campaign-info">
@@ -372,4 +413,62 @@ const handleSubmit = async (e: Event) => {
   color: #666;
   padding: 2rem;
 }
+
+.delete-button {
+  background-color: #e53935;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-confirmation {
+  background-color: #fff3f3;
+  border: 1px solid #e53935;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.confirm-delete-button,
+.cancel-delete-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.confirm-delete-button {
+  background-color: #e53935;
+  color: white;
+  border: none;
+}
+
+.cancel-delete-button {
+  background: none;
+  border: 1px solid #666;
+  color: #666;
+}
+
+.loader {
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  width: 1rem;
+  height: 1rem;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 </style>
+

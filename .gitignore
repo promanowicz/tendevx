@@ -1,6 +1,6 @@
 # Created by https://www.toptal.com/developers/gitignore/api/node,vue,vuejs
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,vue,vuejs
-
+./public
 ### Node ###
 # Logs
 logs
@@ -160,3 +160,4 @@ npm-debug.log
 yarn-error.log
 
 # End of https://www.toptal.com/developers/gitignore/api/node,vue,vuejs
+public/
