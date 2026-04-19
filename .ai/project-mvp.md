@@ -1,22 +1,26 @@
-# Aplikacja - Commercial Manager
+# Commercial Manager — MVP
 
-## Główny problem
-Aplikacja służy do zarządzania kampaniami reklamowymi dla konkretnego klienta.
-umożliwiając tworzenie i zarządzanie kampaniami,
-a także monitorowanie ich skuteczności.
+## Purpose
+Web app for managing commercial campaigns distributed to client fitness apps.
+Each campaign targets specific apps, training sessions, and break positions within those sessions.
 
-## Najmniejszy zestaw funkcjonalności
- - Tworzenie, przeglądanie i edytowanie kampanii reklamowych zawierających zdjęcie i tekst.
- - System kont użytkowników
- - Mierzenie konwersji kampanii
- - AI dające sugestie dotyczące poprawy kampanii
+## Implemented
+- Auth: register, login, logout, password reset
+- Campaign CRUD: create, list, view, edit, soft-delete, publish/unpublish
+- Targeting: per-app targeting with trainingId (autocomplete with name mapping) and break indexes
+- Overlap validation: prevents two campaigns from sharing the same (appId, trainingId) in overlapping date ranges
+- Analytics display: impressions, clicks, interested users (read-only, written by client apps)
+- Firestore security rules: public read on campaigns, authenticated write, owner-only update/delete
 
-## Co NIE wchodzi w zakres MVP
-W skład MVP nie wchodzi:
- - Integracja z zewnętrznymi systemami reklamowymi
- - Zaawansowane raportowanie i analizy
- - Obsługa wielu języków
- - Wsparcie dla różnych formatów reklamowych
+## Pending
+- Central Firebase instance creation and migration
+- App Check setup for client app writes
+- Analytics events subcollection + aggregation
+- AI suggestions (OpenRouter service exists, UI hidden pending access level design)
+- Groups / access control
 
-## Kryteria sukcesu
- - spadek roboczogodzin potrzebnych do zarządzania pojedyńczą kampanią reklamową
+## Out of Scope
+- Integration with Google Ads, Facebook Ads
+- Video / animation ad formats
+- CRM integration
+- Mobile app

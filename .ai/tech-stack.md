@@ -1,11 +1,28 @@
-Frontend - VueJS 3, pinia vue-router
-    Testy vitest i playwright
-Backend - Firebase jako kompleksowe rozwiązanie backendowe:
-- Zapewnia bazę danych Firestore
-- Posiada wbudowaną autentykację użytkowników
+# Tech Stack
 
-AI - Komunikacja z modelami przez openai API:
-- Szybka implementacja na potrzeby MVP
+## Frontend
+- Vue 3 (Composition API) + TypeScript
+- Pinia (state management)
+- Vue Router
+- Vite
 
-CI/CD i Hosting:
-- Github Actions do tworzenia pipeline’ów CI/CD
+## Backend
+- Firebase Auth — email/password authentication
+- Firestore — primary data store
+- Firebase Hosting — static hosting
+
+## Firebase Architecture
+- **Commercial Manager instance** (`comman-2424b`) — auth, user profiles, campaign management
+- **Central campaigns instance** (to be created) — campaign data shared with client apps; public read, authenticated write, App Check enforced for client app writes
+
+## AI
+- OpenRouter service (`openrouter-service.ts`) wrapping OpenAI-compatible API
+- AI features hidden pending access level definition
+
+## Testing
+- Vitest — unit tests
+- Playwright — e2e tests
+
+## CI/CD
+- GitHub Actions
+- Firebase Hosting deploy on merge to main

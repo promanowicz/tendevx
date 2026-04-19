@@ -1,34 +1,57 @@
-# Database Schema for Firestore
+# Database Schema — Firestore
 
 ## Collections
 
-### Users
-- **id**: string (Firebase Auth user id, unique)
-- **name**: string
-- **email**: string
-- **groups**: array of strings (references to group identifiers)
+### users
+| Field | Type | Notes |
+|---|---|---|
+| id | string | Firebase Auth UID |
+| name | string | |
+| email | string | |
+| groups | string[] | reserved for future use |
 
-### Campaigns
-- **uuid**: string (unique campaign identifier)
-- **ownerId**: string (reference to a user via Firebase Auth user id)
-- **title**: string
-- **description**: string
-- **groups**: array of strings (references to group identifiers)
-- **createdAt**: timestamp
-- **updatedAt**: timestamp
+### campaigns
+| Field | Type | Notes |
+|---|---|---|
+| uuid | string | Firestore document ID |
+| ownerId | string | Firebase Auth UID |
+| name | string | internal label (manager only) |
+| description | string | internal notes (manager only) |
+| createdAt | Timestamp | |
+| updatedAt | Timestamp | |
+| isDeleted | boolean? | soft delete flag |
+| targets | AppTarget[] | see below |
+| sponsor | string | |
+| imageUrl | string | pasted URL |
+| bannerUrl | string | pasted URL |
+| productActionUrl | string | CTA / affiliate link |
+| topLabel | string | |
+| bottomLabel | string | |
+| code | string | promo/discount code |
+| startDate | Timestamp? | |
+| endDate | Timestamp? | |
+| published | boolean | |
+| attentionCounter | number | written by client apps only |
+| consumptionCounter | number | written by client apps only |
+| interestedUsers | string[] | written by client apps only |
 
-### Groups
-- **id**: string (unique group identifier)
-- **name**: string
-- **description**: string (optional)
+### AppTarget (embedded in campaigns.targets)
+| Field | Type | Notes |
+|---|---|---|
+| appId | string | matches id in targeting.config.ts |
+| trainingId | number | |
+| breakIndexes | number[] | positions within training session |
 
-## Relations Between Collections
-- Each document in the `Campaigns` collection has one owner, referenced via **ownerId** in the `Users` collection.
-- Campaigns specify access through an array of group identifiers in **groups**.
-- Users have an array field **groups** denoting their memberships in various groups.
+### groups
+| Field | Type | Notes |
+|---|---|---|
+| id | string | Firestore document ID |
+| name | string | |
+| description | string? | |
 
-## Additional Notes
-- Identifiers (user id and campaign uuid) are enforced as unique.
-- Data types (e.g., timestamp for dates) are chosen to accurately represent the information.
-- Consistency is ensured through Firestore transactions and batch writes.
-- Custom indexing and data partitioning are not required, as Firestore provides automatic indexing.
+> Groups reserved for future use.
+
+## Business Rules
+- Two campaigns cannot share the same (appId, trainingId) pair within overlapping date ranges
+- Deletion is soft-only via `isDeleted: true`
+- Analytics fields (`attentionCounter`, `consumptionCounter`, `interestedUsers`) are read-only in the manager — written exclusively by client apps via App Check

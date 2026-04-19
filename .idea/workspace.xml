@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2451a9a1-f6ce-4c16-ab06-7461487bbba3" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/db/database.types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/database.types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/campaign.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/campaign.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/views/campaigns/CampaignCreateView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/campaigns/CampaignCreateView.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/views/campaigns/CampaignDetailsView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/campaigns/CampaignDetailsView.vue" afterDir="false" />
-    </list>
+    <list default="true" id="2451a9a1-f6ce-4c16-ab06-7461487bbba3" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -134,24 +128,12 @@
       <workItem from="1776173378838" duration="95000" />
       <workItem from="1776173489921" duration="1456000" />
       <workItem from="1776262934999" duration="617000" />
-      <workItem from="1776437515602" duration="3908000" />
+      <workItem from="1776437515602" duration="4569000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/src/services/campaign.service.ts</url>
-          <line>218</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="11" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
