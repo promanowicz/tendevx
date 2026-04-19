@@ -5,18 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2451a9a1-f6ce-4c16-ab06-7461487bbba3" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.firebase/hosting.cHVibGlj.cache" beforeDir="false" afterPath="$PROJECT_DIR$/.firebase/hosting.cHVibGlj.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/firebase.json" beforeDir="false" afterPath="$PROJECT_DIR$/firebase.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/playwright-report/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/playwright-report/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/db/database.types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/database.types.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/services/campaign.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/campaign.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/types.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/views/campaigns/CampaignCreateView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/campaigns/CampaignCreateView.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/views/campaigns/CampaignDetailsView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/campaigns/CampaignDetailsView.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/views/campaigns/CampaignListView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/campaigns/CampaignListView.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -141,7 +134,7 @@
       <workItem from="1776173378838" duration="95000" />
       <workItem from="1776173489921" duration="1456000" />
       <workItem from="1776262934999" duration="617000" />
-      <workItem from="1776437515602" duration="1939000" />
+      <workItem from="1776437515602" duration="3908000" />
     </task>
     <servers />
   </component>
@@ -153,20 +146,9 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/src/services/campaign.service.ts</url>
-          <line>169</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/src/services/campaign.service.ts</url>
-          <line>148</line>
+          <line>218</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/src/services/campaign.service.ts</url>
-          <line>153</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="8" />
+          <option name="timeStamp" value="11" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

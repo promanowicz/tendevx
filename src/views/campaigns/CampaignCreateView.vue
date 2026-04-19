@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCampaign } from '@/composables/useCampaign'
 import { Timestamp } from 'firebase/firestore'
+import TargetingEditor from '@/components/TargetingEditor.vue'
+import type { AppTarget } from '@/db/database.types'
 
 const router = useRouter()
 const { createCampaign, error: campaignError } = useCampaign()
@@ -23,19 +25,11 @@ const bannerUrl = ref('')
 const productActionUrl = ref('')
 
 // Targeting fields
-const trainingId = ref<number | ''>('')
-const breakIndexesInput = ref('') // comma-separated input
+const targets = ref<AppTarget[]>([])
 
 // Schedule fields
 const startDateInput = ref('')
 const endDateInput = ref('')
-
-const parseBreakIndexes = (input: string): number[] => {
-  return input
-    .split(',')
-    .map(s => parseInt(s.trim(), 10))
-    .filter(n => !isNaN(n))
-}
 
 const dateToTimestamp = (dateStr: string): Timestamp | null => {
   if (!dateStr) return null
@@ -67,8 +61,7 @@ const handleSubmit = async (e: Event) => {
       imageUrl: imageUrl.value.trim(),
       bannerUrl: bannerUrl.value.trim(),
       productActionUrl: productActionUrl.value.trim(),
-      trainingId: trainingId.value === '' ? 0 : Number(trainingId.value),
-      breakIndexes: parseBreakIndexes(breakIndexesInput.value),
+      targets: targets.value,
       startDate: dateToTimestamp(startDateInput.value),
       endDate: dateToTimestamp(endDateInput.value),
       published: false,
@@ -197,30 +190,7 @@ const handleSubmit = async (e: Event) => {
       <!-- Targeting -->
       <section class="form-section">
         <h2>Targeting</h2>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="trainingId">Training ID</label>
-            <input
-              id="trainingId"
-              v-model="trainingId"
-              type="number"
-              min="0"
-              placeholder="0"
-            >
-          </div>
-
-          <div class="form-group">
-            <label for="breakIndexes">Break Indexes</label>
-            <input
-              id="breakIndexes"
-              v-model="breakIndexesInput"
-              type="text"
-              placeholder="e.g. 1, 3, 5"
-            >
-            <span class="field-hint">Comma-separated list of break positions</span>
-          </div>
-        </div>
+        <TargetingEditor v-model="targets" />
       </section>
 
       <!-- Schedule -->

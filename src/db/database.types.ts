@@ -1,6 +1,15 @@
 import { Timestamp } from 'firebase/firestore';
 
 /**
+ * Per-app targeting configuration within a campaign
+ */
+export interface AppTarget {
+  appId: string;
+  trainingId: number;
+  breakIndexes: number[];
+}
+
+/**
  * User document type in Firestore
  */
 export interface User {
@@ -25,8 +34,7 @@ export interface Campaign {
   isDeleted?: boolean;
 
   // Commercial content fields (consumed by client apps)
-  trainingId: number;
-  breakIndexes: number[];
+  targets: AppTarget[];
   sponsor: string;
   imageUrl: string;
   bannerUrl: string;

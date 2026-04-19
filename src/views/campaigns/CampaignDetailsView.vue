@@ -3,6 +3,9 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCampaign } from '@/composables/useCampaign'
 import { Timestamp } from 'firebase/firestore'
+import TargetingEditor from '@/components/TargetingEditor.vue'
+import { APPS, getTrainingName } from '@/config/targeting.config'
+import type { AppTarget } from '@/db/database.types'
 
 const route = useRoute()
 const router = useRouter()
@@ -28,8 +31,7 @@ const bannerUrl = ref('')
 const productActionUrl = ref('')
 
 // Form fields — targeting
-const trainingId = ref<number>(0)
-const breakIndexesInput = ref('')
+const targets = ref<AppTarget[]>([])
 
 // Form fields — schedule
 const startDateInput = ref('')
@@ -60,8 +62,7 @@ const populateForm = (c: any) => {
   imageUrl.value = c.imageUrl
   bannerUrl.value = c.bannerUrl
   productActionUrl.value = c.productActionUrl
-  trainingId.value = c.trainingId
-  breakIndexesInput.value = (c.breakIndexes ?? []).join(', ')
+  targets.value = c.targets ?? []
   startDateInput.value = timestampToDateInput(c.startDate)
   endDateInput.value = timestampToDateInput(c.endDate)
 }
@@ -88,13 +89,6 @@ const toggleEdit = () => {
   }
 }
 
-const parseBreakIndexes = (input: string): number[] => {
-  return input
-    .split(',')
-    .map(s => parseInt(s.trim(), 10))
-    .filter(n => !isNaN(n))
-}
-
 const handleSubmit = async (e: Event) => {
   e.preventDefault()
   error.value = ''
@@ -115,8 +109,7 @@ const handleSubmit = async (e: Event) => {
       imageUrl: imageUrl.value.trim(),
       bannerUrl: bannerUrl.value.trim(),
       productActionUrl: productActionUrl.value.trim(),
-      trainingId: Number(trainingId.value),
-      breakIndexes: parseBreakIndexes(breakIndexesInput.value),
+      targets: targets.value,
       startDate: dateToTimestamp(startDateInput.value),
       endDate: dateToTimestamp(endDateInput.value),
     })
@@ -245,16 +238,22 @@ const handleDelete = async () => {
 
         <section class="info-section">
           <h2>Targeting</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <span class="info-label">Training ID</span>
-              <span>{{ campaign.trainingId }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Break Indexes</span>
-              <span>{{ campaign.breakIndexes?.join(', ') || '—' }}</span>
+          <div v-if="campaign.targets?.length" class="targets-view">
+            <div v-for="target in campaign.targets" :key="target.appId" class="target-view-row">
+              <span class="target-view-app">
+                {{ APPS.find(a => a.id === target.appId)?.displayName ?? target.appId }}
+              </span>
+              <div class="target-view-fields">
+                <span>
+                  Training:
+                  <strong>{{ target.trainingId }}</strong>
+                  <em v-if="getTrainingName(target.trainingId)"> — {{ getTrainingName(target.trainingId) }}</em>
+                </span>
+                <span>Breaks: <strong>{{ target.breakIndexes.join(', ') || '—' }}</strong></span>
+              </div>
             </div>
           </div>
+          <p v-else class="empty-hint">No targets configured.</p>
         </section>
 
         <section class="info-section">
@@ -357,17 +356,7 @@ const handleDelete = async () => {
 
         <section class="form-section">
           <h2>Targeting</h2>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="trainingId">Training ID</label>
-              <input id="trainingId" v-model="trainingId" type="number" min="0">
-            </div>
-            <div class="form-group">
-              <label for="breakIndexes">Break Indexes</label>
-              <input id="breakIndexes" v-model="breakIndexesInput" type="text" placeholder="e.g. 1, 3, 5">
-              <span class="field-hint">Comma-separated list</span>
-            </div>
-          </div>
+          <TargetingEditor v-model="targets" />
         </section>
 
         <section class="form-section">
@@ -709,5 +698,46 @@ const handleDelete = async () => {
   text-align: center;
   color: #666;
   padding: 2rem;
+}
+
+.targets-view {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.target-view-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  padding: 0.6rem 0.75rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #eee;
+}
+
+.target-view-app {
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-width: 130px;
+  color: #333;
+}
+
+.target-view-fields {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.target-view-fields em {
+  color: #2e7d32;
+  font-style: normal;
+}
+
+.empty-hint {
+  font-size: 0.875rem;
+  color: #999;
+  margin: 0;
 }
 </style>
