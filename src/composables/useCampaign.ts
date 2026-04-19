@@ -59,7 +59,10 @@ export function useCampaign() {
     error.value = null;
 
     try {
-      const campaign = await campaignService.createCampaign(data, authStore.userId);
+      const campaign = await campaignService.createCampaign(
+        { ...data, ownerId: authStore.userId },
+        authStore.userId
+      );
       campaigns.value.push(campaign);
       return campaign;
     } catch (e) {

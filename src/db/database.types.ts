@@ -16,12 +16,32 @@ export interface User {
 export interface Campaign {
   uuid: string; // unique campaign identifier
   ownerId: string; // reference to a user via Firebase Auth user id
-  title: string;
-  description: string;
-  groups: string[]; // references to group identifiers;
+
+  // Manager-internal fields
+  name: string; // internal campaign name for organizing
+  description: string; // internal notes/description
   createdAt: Timestamp;
   updatedAt: Timestamp;
-  isDeleted?: boolean; // optional, for soft deletion
+  isDeleted?: boolean;
+
+  // Commercial content fields (consumed by client apps)
+  trainingId: number;
+  breakIndexes: number[];
+  sponsor: string;
+  imageUrl: string;
+  bannerUrl: string;
+  productActionUrl: string;
+  topLabel: string;
+  code: string;
+  bottomLabel: string;
+  startDate: Timestamp | null;
+  endDate: Timestamp | null;
+  published: boolean;
+
+  // Analytics — written by client apps, read-only in manager
+  attentionCounter: number;
+  consumptionCounter: number;
+  interestedUsers: string[];
 }
 
 /**

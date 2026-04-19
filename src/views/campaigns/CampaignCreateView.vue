@@ -2,109 +2,76 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCampaign } from '@/composables/useCampaign'
-import { useAuthStore } from '@/stores/auth'
-import { OpenRouterService } from '@/services/openrouter-service'
 import { Timestamp } from 'firebase/firestore'
 
 const router = useRouter()
 const { createCampaign, error: campaignError } = useCampaign()
-const authStore = useAuthStore()
 
-// Existing refs
-const title = ref('')
-const description = ref('')
-const groups = ref<string[]>([])
-const newGroup = ref('')
 const error = ref('')
 
-// New refs for AI suggestions
-const showSuggestions = ref(false)
-const aiSuggestions = ref('')
-const isLoadingSuggestions = ref(false)
-const suggestionType = ref<'title' | 'description'>('title')
-const suggestionOriginalValue = ref('')
+// Manager fields
+const name = ref('')
+const description = ref('')
 
-// Initialize OpenRouter service
-const openRouter = new OpenRouterService({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY || ''
-})
+// Commercial content fields
+const sponsor = ref('')
+const topLabel = ref('')
+const bottomLabel = ref('')
+const code = ref('')
+const imageUrl = ref('')
+const bannerUrl = ref('')
+const productActionUrl = ref('')
 
-const requestAiSuggestions = async (type: 'title' | 'description') => {
-  suggestionType.value = type
-  suggestionOriginalValue.value = type === 'title' ? title.value : description.value
+// Targeting fields
+const trainingId = ref<number | ''>('')
+const breakIndexesInput = ref('') // comma-separated input
 
-  if (!suggestionOriginalValue.value.trim()) {
-    error.value = `Please enter some ${type} text first`
-    return
-  }
+// Schedule fields
+const startDateInput = ref('')
+const endDateInput = ref('')
 
-  try {
-    isLoadingSuggestions.value = true
-    const campaign = {
-      uuid: 'draft',
-      title: type === 'title' ? title.value : '',
-      description: type === 'description' ? description.value : '',
-      ownerId: authStore.userId!,
-      groups: groups.value,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    }
-
-    const suggestions = await openRouter.provideSuggestion(campaign)
-    // Extract the relevant part from AI response
-    const improvedText = suggestions.split('\n').find(line =>
-      line.toLowerCase().includes(type.toLowerCase() + ':')
-    )?.split(':')[1]?.trim() || suggestions.trim()
-
-    aiSuggestions.value = improvedText
-    showSuggestions.value = true
-  } catch (e) {
-    error.value = (e as Error).message
-  } finally {
-    isLoadingSuggestions.value = false
-  }
+const parseBreakIndexes = (input: string): number[] => {
+  return input
+    .split(',')
+    .map(s => parseInt(s.trim(), 10))
+    .filter(n => !isNaN(n))
 }
 
-const applySuggestions = () => {
-  if (suggestionType.value === 'title') {
-    title.value = aiSuggestions.value
-  } else {
-    description.value = aiSuggestions.value
-  }
-  showSuggestions.value = false
-}
-
-const rejectSuggestions = () => {
-  showSuggestions.value = false
-}
-
-const addGroup = () => {
-  if (!newGroup.value.trim()) return
-  if (!groups.value.includes(newGroup.value.trim())) {
-    groups.value.push(newGroup.value.trim())
-  }
-  newGroup.value = ''
-}
-
-const removeGroup = (group: string) => {
-  groups.value = groups.value.filter(g => g !== group)
+const dateToTimestamp = (dateStr: string): Timestamp | null => {
+  if (!dateStr) return null
+  return Timestamp.fromDate(new Date(dateStr))
 }
 
 const handleSubmit = async (e: Event) => {
   e.preventDefault()
   error.value = ''
 
-  if (!title.value.trim()) {
-    error.value = 'Title is required'
+  if (!name.value.trim()) {
+    error.value = 'Campaign name is required'
+    return
+  }
+
+  if (!sponsor.value.trim()) {
+    error.value = 'Sponsor is required'
     return
   }
 
   try {
     const campaign = await createCampaign({
-      title: title.value.trim(),
+      name: name.value.trim(),
       description: description.value.trim(),
-      ownerId: authStore.userId!,
-      groups: groups.value
+      sponsor: sponsor.value.trim(),
+      topLabel: topLabel.value.trim(),
+      bottomLabel: bottomLabel.value.trim(),
+      code: code.value.trim(),
+      imageUrl: imageUrl.value.trim(),
+      bannerUrl: bannerUrl.value.trim(),
+      productActionUrl: productActionUrl.value.trim(),
+      trainingId: trainingId.value === '' ? 0 : Number(trainingId.value),
+      breakIndexes: parseBreakIndexes(breakIndexesInput.value),
+      startDate: dateToTimestamp(startDateInput.value),
+      endDate: dateToTimestamp(endDateInput.value),
+      published: false,
     })
 
     router.push(`/campaigns/${campaign.uuid}`)
@@ -123,80 +90,163 @@ const handleSubmit = async (e: Event) => {
         {{ error || campaignError }}
       </div>
 
-      <div class="form-group">
-        <label for="title">Campaign Title</label>
-        <div class="input-with-magic">
+      <!-- Manager fields -->
+      <section class="form-section">
+        <h2>Campaign Info</h2>
+
+        <div class="form-group">
+          <label for="name">Name <span class="required">*</span></label>
           <input
-            id="title"
-            v-model="title"
+            id="name"
+            v-model="name"
             type="text"
             required
-            placeholder="Enter campaign title"
+            placeholder="Internal campaign name"
           >
-<!--          <button-->
-<!--            type="button"-->
-<!--            class="magic-button"-->
-<!--            @click="requestAiSuggestions('title')"-->
-<!--            :disabled="isLoadingSuggestions"-->
-<!--          >-->
-<!--            ✨-->
-<!--          </button>-->
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="description">Description</label>
-        <div class="input-with-magic">
+        <div class="form-group">
+          <label for="description">Description</label>
           <textarea
             id="description"
             v-model="description"
-            rows="4"
-            placeholder="Enter campaign description"
+            rows="3"
+            placeholder="Internal notes about this campaign"
           ></textarea>
-          <button
-            type="button"
-            class="magic-button"
-            @click="requestAiSuggestions('description')"
-            :disabled="isLoadingSuggestions"
+        </div>
+      </section>
+
+      <!-- Commercial content -->
+      <section class="form-section">
+        <h2>Commercial Content</h2>
+
+        <div class="form-group">
+          <label for="sponsor">Sponsor <span class="required">*</span></label>
+          <input
+            id="sponsor"
+            v-model="sponsor"
+            type="text"
+            required
+            placeholder="Sponsor name"
           >
-            ✨
-          </button>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label>Groups</label>
-        <div class="groups-container">
-          <div class="groups-input">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="topLabel">Top Label</label>
             <input
-              v-model="newGroup"
+              id="topLabel"
+              v-model="topLabel"
               type="text"
-              placeholder="Add a group"
-              @keyup.enter.prevent="addGroup"
+              placeholder="Text shown at the top"
             >
-            <button type="button" @click="addGroup" class="add-group-button">
-              Add
-            </button>
           </div>
 
-          <div v-if="groups.length > 0" class="groups-list">
-            <span
-              v-for="group in groups"
-              :key="group"
-              class="group-tag"
+          <div class="form-group">
+            <label for="bottomLabel">Bottom Label</label>
+            <input
+              id="bottomLabel"
+              v-model="bottomLabel"
+              type="text"
+              placeholder="Text shown at the bottom"
             >
-              {{ group }}
-              <button
-                type="button"
-                @click="removeGroup(group)"
-                class="remove-group"
-              >
-                ×
-              </button>
-            </span>
           </div>
         </div>
-      </div>
+
+        <div class="form-group">
+          <label for="code">Promo Code</label>
+          <input
+            id="code"
+            v-model="code"
+            type="text"
+            placeholder="Discount or promo code"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="imageUrl">Image URL</label>
+          <input
+            id="imageUrl"
+            v-model="imageUrl"
+            type="url"
+            placeholder="https://..."
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="bannerUrl">Banner URL</label>
+          <input
+            id="bannerUrl"
+            v-model="bannerUrl"
+            type="url"
+            placeholder="https://..."
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="productActionUrl">Product Action URL</label>
+          <input
+            id="productActionUrl"
+            v-model="productActionUrl"
+            type="url"
+            placeholder="https://..."
+          >
+        </div>
+      </section>
+
+      <!-- Targeting -->
+      <section class="form-section">
+        <h2>Targeting</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="trainingId">Training ID</label>
+            <input
+              id="trainingId"
+              v-model="trainingId"
+              type="number"
+              min="0"
+              placeholder="0"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="breakIndexes">Break Indexes</label>
+            <input
+              id="breakIndexes"
+              v-model="breakIndexesInput"
+              type="text"
+              placeholder="e.g. 1, 3, 5"
+            >
+            <span class="field-hint">Comma-separated list of break positions</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Schedule -->
+      <section class="form-section">
+        <h2>Schedule</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input
+              id="startDate"
+              v-model="startDateInput"
+              type="date"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input
+              id="endDate"
+              v-model="endDateInput"
+              type="date"
+            >
+          </div>
+        </div>
+      </section>
 
       <div class="form-actions">
         <button type="button" @click="router.back()" class="cancel-button">
@@ -207,31 +257,6 @@ const handleSubmit = async (e: Event) => {
         </button>
       </div>
     </form>
-
-    <!-- AI Suggestions Dialog -->
-    <div v-if="showSuggestions" class="suggestions-overlay">
-      <div class="suggestions-dialog">
-        <h3>AI Suggestions</h3>
-        <div class="suggestions-content">
-          <div class="original-text">
-            <h4>Original {{ suggestionType }}</h4>
-            <p>{{ suggestionOriginalValue }}</p>
-          </div>
-          <div class="suggested-text">
-            <h4>Suggested {{ suggestionType }}</h4>
-            <p>{{ aiSuggestions }}</p>
-          </div>
-        </div>
-        <div class="suggestions-actions">
-          <button @click="rejectSuggestions" class="reject-button">
-            Reject
-          </button>
-          <button @click="applySuggestions" class="apply-button">
-            Apply Changes
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -242,81 +267,79 @@ const handleSubmit = async (e: Event) => {
 }
 
 .campaign-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-section {
   background-color: white;
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.form-section h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+  margin: 0 0 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.required {
+  color: #e53935;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.65rem 0.75rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
+  box-sizing: border-box;
 }
 
-.groups-container {
-  margin-top: 0.5rem;
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4CAF50;
 }
 
-.groups-input {
-  display: flex;
-  gap: 0.5rem;
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
 }
 
-.add-group-button {
-  padding: 0.75rem 1.5rem;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.groups-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.group-tag {
-  background-color: #e0f2f1;
-  color: #00796b;
-  padding: 0.25rem 0.75rem;
-  border-radius: 16px;
-  font-size: 0.875rem;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.remove-group {
-  background: none;
-  border: none;
-  color: #00796b;
-  font-size: 1.25rem;
-  cursor: pointer;
-  padding: 0 0.25rem;
+.field-hint {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 0.25rem;
+  display: block;
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  margin-top: 2rem;
 }
 
 .cancel-button,
@@ -325,6 +348,7 @@ const handleSubmit = async (e: Event) => {
   border-radius: 4px;
   font-weight: 500;
   cursor: pointer;
+  font-size: 1rem;
 }
 
 .cancel-button {
@@ -344,112 +368,5 @@ const handleSubmit = async (e: Event) => {
   color: #c62828;
   padding: 1rem;
   border-radius: 4px;
-  margin-bottom: 1.5rem;
-}
-
-.input-with-magic {
-  display: flex;
-  gap: 0.5rem;
-  align-items: flex-start;
-}
-
-.input-with-magic input,
-.input-with-magic textarea {
-  flex: 1;
-}
-
-.magic-button {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 50%;
-  transition: transform 0.2s;
-  line-height: 1;
-}
-
-.magic-button:hover {
-  transform: scale(1.1);
-  background-color: #f0f0f0;
-}
-
-.magic-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.suggestions-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.suggestions-dialog {
-  background-color: white;
-  border-radius: 8px;
-  padding: 2rem;
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.suggestions-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  margin: 1.5rem 0;
-}
-
-.original-text,
-.suggested-text {
-  background-color: #f5f5f5;
-  padding: 1rem;
-  border-radius: 4px;
-}
-
-.suggestions-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.reject-button,
-.apply-button {
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.reject-button {
-  background: none;
-  border: 1px solid #666;
-  color: #666;
-}
-
-.apply-button {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-}
-
-.suggestions-dialog h3 {
-  margin: 0 0 1rem;
-  color: #333;
-}
-
-.suggestions-dialog h4 {
-  margin: 0 0 0.5rem;
-  color: #666;
 }
 </style>

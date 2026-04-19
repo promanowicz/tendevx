@@ -1,7 +1,7 @@
 import type { Campaign, User, Group } from '@/db/database.types';
 
-export type CreateCampaignData = Omit<Campaign, 'uuid' | 'createdAt' | 'updatedAt'>;
-export type UpdateCampaignData = Partial<Omit<Campaign, 'uuid' | 'createdAt' | 'updatedAt' | 'ownerId'>>;
+export type CreateCampaignData = Omit<Campaign, 'uuid' | 'createdAt' | 'updatedAt' | 'ownerId' | 'attentionCounter' | 'consumptionCounter' | 'interestedUsers'>;
+export type UpdateCampaignData = Partial<Omit<Campaign, 'uuid' | 'createdAt' | 'updatedAt' | 'ownerId' | 'attentionCounter' | 'consumptionCounter' | 'interestedUsers'>>;
 
 export type CreateUserData = Omit<User, 'id'>;
 export type UpdateUserData = Partial<Omit<User, 'id' | 'email'>>;

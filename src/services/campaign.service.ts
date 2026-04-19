@@ -27,7 +27,7 @@ export class CampaignService {
   async createCampaign(data: CreateCampaignData, userId: string): Promise<Campaign> {
     try {
       // Validate required fields
-      if (!data.title || !data.ownerId || !Array.isArray(data.groups)) {
+      if (!data.name || !data.ownerId) {
         throw new Error('Missing required fields');
       }
 
@@ -39,6 +39,9 @@ export class CampaignService {
       const timestamp = Timestamp.now();
       const campaignData: Omit<Campaign, 'uuid'> = {
         ...data,
+        attentionCounter: 0,
+        consumptionCounter: 0,
+        interestedUsers: [],
         createdAt: timestamp,
         updatedAt: timestamp
       };

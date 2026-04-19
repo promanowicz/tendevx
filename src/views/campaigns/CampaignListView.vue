@@ -11,7 +11,7 @@ onMounted(async () => {
 })
 
 const formatDate = (timestamp: any) => {
-  if (!timestamp) return ''
+  if (!timestamp) return '—'
   return new Date(timestamp.seconds * 1000).toLocaleDateString()
 }
 
@@ -48,16 +48,25 @@ const navigateToDetails = (uuid: string) => {
         class="campaign-card"
         @click="navigateToDetails(campaign.uuid)"
       >
-        <h3>{{ campaign.title }}</h3>
-        <p class="campaign-description">{{ campaign.description }}</p>
-        <div class="campaign-meta">
-          <span>Created: {{ formatDate(campaign.createdAt) }}</span>
-          <span>Updated: {{ formatDate(campaign.updatedAt) }}</span>
-        </div>
-        <div class="campaign-groups">
-          <span v-for="group in campaign.groups" :key="group" class="group-tag">
-            {{ group }}
+        <div class="card-top">
+          <h3>{{ campaign.name }}</h3>
+          <span :class="['status-badge', campaign.published ? 'published' : 'draft']">
+            {{ campaign.published ? 'Published' : 'Draft' }}
           </span>
+        </div>
+
+        <p class="campaign-sponsor">{{ campaign.sponsor }}</p>
+        <p class="campaign-description">{{ campaign.description }}</p>
+
+        <div class="campaign-meta">
+          <span>Start: {{ formatDate(campaign.startDate) }}</span>
+          <span>End: {{ formatDate(campaign.endDate) }}</span>
+        </div>
+
+        <div class="campaign-analytics">
+          <span title="Impressions">👁 {{ campaign.attentionCounter }}</span>
+          <span title="Clicks">🖱 {{ campaign.consumptionCounter }}</span>
+          <span title="Interested">❤️ {{ campaign.interestedUsers?.length ?? 0 }}</span>
         </div>
       </div>
     </div>
@@ -106,13 +115,50 @@ const navigateToDetails = (uuid: string) => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.card-top h3 {
+  margin: 0;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.status-badge.published {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-badge.draft {
+  background-color: #f5f5f5;
+  color: #757575;
+}
+
+.campaign-sponsor {
+  font-weight: 500;
+  color: #333;
+  margin: 0.25rem 0 0.5rem;
+}
+
 .campaign-description {
   color: #666;
-  margin: 0.5rem 0;
+  margin: 0 0 1rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-size: 0.9rem;
 }
 
 .campaign-meta {
@@ -120,21 +166,16 @@ const navigateToDetails = (uuid: string) => {
   justify-content: space-between;
   font-size: 0.875rem;
   color: #888;
-  margin: 1rem 0;
+  margin-bottom: 0.75rem;
 }
 
-.campaign-groups {
+.campaign-analytics {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.group-tag {
-  background-color: #e0f2f1;
-  color: #00796b;
-  padding: 0.25rem 0.75rem;
-  border-radius: 16px;
+  gap: 1rem;
   font-size: 0.875rem;
+  color: #555;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 0.75rem;
 }
 
 .error-message {

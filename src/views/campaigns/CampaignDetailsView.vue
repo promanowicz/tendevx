@@ -2,26 +2,69 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCampaign } from '@/composables/useCampaign'
-import { useAuthStore } from '@/stores/auth'
+import { Timestamp } from 'firebase/firestore'
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
 const { getCampaign, updateCampaign, deleteCampaign, error: campaignError } = useCampaign()
 
 const isEditing = ref(false)
 const campaign = ref<any>(null)
 const error = ref('')
-
-// Form fields
-const title = ref('')
-const description = ref('')
-const groups = ref<string[]>([])
-const newGroup = ref('')
-
-// Delete dialog state
 const showDeleteConfirm = ref(false)
 const isDeleting = ref(false)
+
+// Form fields — manager
+const name = ref('')
+const description = ref('')
+
+// Form fields — commercial content
+const sponsor = ref('')
+const topLabel = ref('')
+const bottomLabel = ref('')
+const code = ref('')
+const imageUrl = ref('')
+const bannerUrl = ref('')
+const productActionUrl = ref('')
+
+// Form fields — targeting
+const trainingId = ref<number>(0)
+const breakIndexesInput = ref('')
+
+// Form fields — schedule
+const startDateInput = ref('')
+const endDateInput = ref('')
+
+const timestampToDateInput = (ts: any): string => {
+  if (!ts) return ''
+  return new Date(ts.seconds * 1000).toISOString().split('T')[0]
+}
+
+const dateToTimestamp = (dateStr: string): Timestamp | null => {
+  if (!dateStr) return null
+  return Timestamp.fromDate(new Date(dateStr))
+}
+
+const formatDate = (ts: any): string => {
+  if (!ts) return '—'
+  return new Date(ts.seconds * 1000).toLocaleDateString()
+}
+
+const populateForm = (c: any) => {
+  name.value = c.name
+  description.value = c.description
+  sponsor.value = c.sponsor
+  topLabel.value = c.topLabel
+  bottomLabel.value = c.bottomLabel
+  code.value = c.code
+  imageUrl.value = c.imageUrl
+  bannerUrl.value = c.bannerUrl
+  productActionUrl.value = c.productActionUrl
+  trainingId.value = c.trainingId
+  breakIndexesInput.value = (c.breakIndexes ?? []).join(', ')
+  startDateInput.value = timestampToDateInput(c.startDate)
+  endDateInput.value = timestampToDateInput(c.endDate)
+}
 
 onMounted(async () => {
   const campaignId = route.params.id as string
@@ -32,60 +75,65 @@ onMounted(async () => {
       return
     }
     campaign.value = result
-    // Initialize form fields
-    title.value = result.title
-    description.value = result.description
-    groups.value = [...result.groups]
+    populateForm(result)
   } catch (e) {
     error.value = (e as Error).message
   }
 })
 
-const formatDate = (timestamp: any) => {
-  if (!timestamp) return ''
-  return new Date(timestamp.seconds * 1000).toLocaleDateString()
-}
-
 const toggleEdit = () => {
   isEditing.value = !isEditing.value
   if (!isEditing.value) {
-    // Reset form when canceling edit
-    title.value = campaign.value.title
-    description.value = campaign.value.description
-    groups.value = [...campaign.value.groups]
+    populateForm(campaign.value)
   }
 }
 
-const addGroup = () => {
-  if (!newGroup.value.trim()) return
-  if (!groups.value.includes(newGroup.value.trim())) {
-    groups.value.push(newGroup.value.trim())
-  }
-  newGroup.value = ''
-}
-
-const removeGroup = (group: string) => {
-  groups.value = groups.value.filter(g => g !== group)
+const parseBreakIndexes = (input: string): number[] => {
+  return input
+    .split(',')
+    .map(s => parseInt(s.trim(), 10))
+    .filter(n => !isNaN(n))
 }
 
 const handleSubmit = async (e: Event) => {
   e.preventDefault()
   error.value = ''
 
-  if (!title.value.trim()) {
-    error.value = 'Title is required'
+  if (!name.value.trim()) {
+    error.value = 'Campaign name is required'
     return
   }
 
   try {
     const updatedCampaign = await updateCampaign(campaign.value.uuid, {
-      title: title.value.trim(),
+      name: name.value.trim(),
       description: description.value.trim(),
-      groups: groups.value
+      sponsor: sponsor.value.trim(),
+      topLabel: topLabel.value.trim(),
+      bottomLabel: bottomLabel.value.trim(),
+      code: code.value.trim(),
+      imageUrl: imageUrl.value.trim(),
+      bannerUrl: bannerUrl.value.trim(),
+      productActionUrl: productActionUrl.value.trim(),
+      trainingId: Number(trainingId.value),
+      breakIndexes: parseBreakIndexes(breakIndexesInput.value),
+      startDate: dateToTimestamp(startDateInput.value),
+      endDate: dateToTimestamp(endDateInput.value),
     })
 
     campaign.value = updatedCampaign
     isEditing.value = false
+  } catch (e) {
+    error.value = (e as Error).message
+  }
+}
+
+const togglePublished = async () => {
+  try {
+    const updatedCampaign = await updateCampaign(campaign.value.uuid, {
+      published: !campaign.value.published,
+    })
+    campaign.value = updatedCampaign
   } catch (e) {
     error.value = (e as Error).message
   }
@@ -114,130 +162,233 @@ const handleDelete = async () => {
     </div>
 
     <div v-if="campaign" class="campaign-content">
+
+      <!-- Header bar -->
       <div class="campaign-header">
-        <div v-if="!isEditing" class="view-mode">
-          <h1>{{ campaign.title }}</h1>
-          <button @click="toggleEdit" class="edit-button">
-            Edit Campaign
+        <div class="header-left">
+          <router-link to="/campaigns" class="back-link">← Campaigns</router-link>
+          <h1>{{ campaign.name }}</h1>
+        </div>
+        <div class="header-actions">
+          <button
+            @click="togglePublished"
+            :class="['publish-button', campaign.published ? 'unpublish' : 'publish']"
+          >
+            {{ campaign.published ? 'Unpublish' : 'Publish' }}
+          </button>
+          <button v-if="!isEditing" @click="toggleEdit" class="edit-button">
+            Edit
           </button>
         </div>
+      </div>
 
-        <form v-else @submit="handleSubmit" class="edit-form">
-          <div class="form-group">
-            <label for="title">Campaign Title</label>
-            <input
-              id="title"
-              v-model="title"
-              type="text"
-              required
-              placeholder="Enter campaign title"
-            >
-          </div>
-
-          <div class="form-group">
-            <label for="description">Description</label>
-            <textarea
-              id="description"
-              v-model="description"
-              rows="4"
-              placeholder="Enter campaign description"
-            ></textarea>
-          </div>
-
-          <div class="form-group">
-            <label>Groups</label>
-            <div class="groups-container">
-              <div class="groups-input">
-                <input
-                  v-model="newGroup"
-                  type="text"
-                  placeholder="Add a group"
-                  @keyup.enter.prevent="addGroup"
-                >
-                <button type="button" @click="addGroup" class="add-group-button">
-                  Add
-                </button>
-              </div>
-
-              <div v-if="groups.length > 0" class="groups-list">
-                <span
-                  v-for="group in groups"
-                  :key="group"
-                  class="group-tag"
-                >
-                  {{ group }}
-                  <button
-                    type="button"
-                    @click="removeGroup(group)"
-                    class="remove-group"
-                  >
-                    ×
-                  </button>
-                </span>
-              </div>
+      <!-- View mode -->
+      <template v-if="!isEditing">
+        <section class="info-section">
+          <h2>Campaign Info</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Name</span>
+              <span>{{ campaign.name }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Description</span>
+              <span>{{ campaign.description || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Created</span>
+              <span>{{ formatDate(campaign.createdAt) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Updated</span>
+              <span>{{ formatDate(campaign.updatedAt) }}</span>
             </div>
           </div>
+        </section>
 
-          <div class="form-actions">
-            <button type="button" @click="showDeleteConfirm = true" class="delete-button">
-              Delete Campaign
-            </button>
-            <button type="button" @click="toggleEdit" class="cancel-button">
-              Cancel
-            </button>
-            <button type="submit" class="submit-button">
-              Save Changes
-            </button>
+        <section class="info-section">
+          <h2>Commercial Content</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Sponsor</span>
+              <span>{{ campaign.sponsor || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Top Label</span>
+              <span>{{ campaign.topLabel || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Bottom Label</span>
+              <span>{{ campaign.bottomLabel || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Promo Code</span>
+              <span>{{ campaign.code || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Image URL</span>
+              <a v-if="campaign.imageUrl" :href="campaign.imageUrl" target="_blank" class="url-link">{{ campaign.imageUrl }}</a>
+              <span v-else>—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Banner URL</span>
+              <a v-if="campaign.bannerUrl" :href="campaign.bannerUrl" target="_blank" class="url-link">{{ campaign.bannerUrl }}</a>
+              <span v-else>—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Product Action URL</span>
+              <a v-if="campaign.productActionUrl" :href="campaign.productActionUrl" target="_blank" class="url-link">{{ campaign.productActionUrl }}</a>
+              <span v-else>—</span>
+            </div>
           </div>
-        </form>
-        <div v-if="showDeleteConfirm" class="delete-confirmation">
-          <p>Are you sure you want to delete this campaign?</p>
-          <div class="confirm-actions">
-            <button
-              @click="handleDelete"
-              class="confirm-delete-button"
-              :disabled="isDeleting"
-            >
-              <span v-if="isDeleting" class="loader"></span>
-              Delete Campaign
-            </button>
-            <button
-              @click="showDeleteConfirm = false"
-              class="cancel-delete-button"
-            >
-              Cancel
-            </button>
+        </section>
+
+        <section class="info-section">
+          <h2>Targeting</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Training ID</span>
+              <span>{{ campaign.trainingId }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Break Indexes</span>
+              <span>{{ campaign.breakIndexes?.join(', ') || '—' }}</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="info-section">
+          <h2>Schedule</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Start Date</span>
+              <span>{{ formatDate(campaign.startDate) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">End Date</span>
+              <span>{{ formatDate(campaign.endDate) }}</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="info-section analytics-section">
+          <h2>Analytics</h2>
+          <div class="analytics-grid">
+            <div class="analytics-card">
+              <span class="analytics-value">{{ campaign.attentionCounter }}</span>
+              <span class="analytics-label">Impressions</span>
+            </div>
+            <div class="analytics-card">
+              <span class="analytics-value">{{ campaign.consumptionCounter }}</span>
+              <span class="analytics-label">Clicks</span>
+            </div>
+            <div class="analytics-card">
+              <span class="analytics-value">{{ campaign.interestedUsers?.length ?? 0 }}</span>
+              <span class="analytics-label">Interested Users</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Delete -->
+        <div class="danger-zone">
+          <button @click="showDeleteConfirm = true" class="delete-button">
+            Delete Campaign
+          </button>
+          <div v-if="showDeleteConfirm" class="delete-confirmation">
+            <p>Are you sure you want to delete this campaign?</p>
+            <div class="confirm-actions">
+              <button @click="showDeleteConfirm = false" class="cancel-delete-button">Cancel</button>
+              <button @click="handleDelete" class="confirm-delete-button" :disabled="isDeleting">
+                <span v-if="isDeleting" class="loader"></span>
+                Delete
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </template>
 
-      <div v-if="!isEditing" class="campaign-info">
-        <p class="campaign-description">{{ campaign.description }}</p>
+      <!-- Edit mode -->
+      <form v-else @submit="handleSubmit" class="edit-form">
+        <section class="form-section">
+          <h2>Campaign Info</h2>
+          <div class="form-group">
+            <label for="name">Name <span class="required">*</span></label>
+            <input id="name" v-model="name" type="text" required>
+          </div>
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" v-model="description" rows="3"></textarea>
+          </div>
+        </section>
 
-        <div class="campaign-meta">
-          <div class="meta-item">
-            <span class="meta-label">Created:</span>
-            <span>{{ formatDate(campaign.createdAt) }}</span>
+        <section class="form-section">
+          <h2>Commercial Content</h2>
+          <div class="form-group">
+            <label for="sponsor">Sponsor</label>
+            <input id="sponsor" v-model="sponsor" type="text">
           </div>
-          <div class="meta-item">
-            <span class="meta-label">Updated:</span>
-            <span>{{ formatDate(campaign.updatedAt) }}</span>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="topLabel">Top Label</label>
+              <input id="topLabel" v-model="topLabel" type="text">
+            </div>
+            <div class="form-group">
+              <label for="bottomLabel">Bottom Label</label>
+              <input id="bottomLabel" v-model="bottomLabel" type="text">
+            </div>
           </div>
+          <div class="form-group">
+            <label for="code">Promo Code</label>
+            <input id="code" v-model="code" type="text">
+          </div>
+          <div class="form-group">
+            <label for="imageUrl">Image URL</label>
+            <input id="imageUrl" v-model="imageUrl" type="url">
+          </div>
+          <div class="form-group">
+            <label for="bannerUrl">Banner URL</label>
+            <input id="bannerUrl" v-model="bannerUrl" type="url">
+          </div>
+          <div class="form-group">
+            <label for="productActionUrl">Product Action URL</label>
+            <input id="productActionUrl" v-model="productActionUrl" type="url">
+          </div>
+        </section>
+
+        <section class="form-section">
+          <h2>Targeting</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="trainingId">Training ID</label>
+              <input id="trainingId" v-model="trainingId" type="number" min="0">
+            </div>
+            <div class="form-group">
+              <label for="breakIndexes">Break Indexes</label>
+              <input id="breakIndexes" v-model="breakIndexesInput" type="text" placeholder="e.g. 1, 3, 5">
+              <span class="field-hint">Comma-separated list</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <h2>Schedule</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="startDate">Start Date</label>
+              <input id="startDate" v-model="startDateInput" type="date">
+            </div>
+            <div class="form-group">
+              <label for="endDate">End Date</label>
+              <input id="endDate" v-model="endDateInput" type="date">
+            </div>
+          </div>
+        </section>
+
+        <div class="form-actions">
+          <button type="button" @click="toggleEdit" class="cancel-button">Cancel</button>
+          <button type="submit" class="submit-button">Save Changes</button>
         </div>
-
-        <div class="campaign-groups">
-          <h3>Groups</h3>
-          <div class="groups-list">
-            <span
-              v-for="group in campaign.groups"
-              :key="group"
-              class="group-tag"
-            >
-              {{ group }}
-            </span>
-          </div>
-        </div>
-      </div>
+      </form>
     </div>
 
     <div v-else-if="!error" class="loading">
@@ -253,131 +404,208 @@ const handleDelete = async () => {
 }
 
 .campaign-content {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .campaign-header {
-  margin-bottom: 2rem;
-}
-
-.view-mode {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.header-left h1 {
+  margin: 0;
+}
+
+.back-link {
+  font-size: 0.875rem;
+  color: #666;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: #333;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
 }
 
 .edit-button {
+  padding: 0.6rem 1.25rem;
   background-color: #4CAF50;
   color: white;
-  padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: 500;
 }
 
-.campaign-description {
-  color: #666;
-  line-height: 1.6;
-  margin-bottom: 2rem;
+.publish-button {
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
 }
 
-.campaign-meta {
+.publish-button.publish {
+  background-color: #1976D2;
+  color: white;
+}
+
+.publish-button.unpublish {
+  background-color: #f5f5f5;
+  color: #555;
+  border: 1px solid #ccc;
+}
+
+/* Sections */
+.info-section,
+.form-section {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.info-section h2,
+.form-section h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+  margin: 0 0 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.info-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.url-link {
+  color: #1976D2;
+  text-decoration: none;
+  word-break: break-all;
+  font-size: 0.9rem;
+}
+
+.url-link:hover {
+  text-decoration: underline;
+}
+
+/* Analytics */
+.analytics-grid {
   display: flex;
   gap: 2rem;
-  margin-bottom: 2rem;
 }
 
-.meta-item {
+.analytics-card {
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f9f9f9;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  min-width: 120px;
 }
 
-.meta-label {
-  font-weight: 500;
-  color: #666;
+.analytics-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
 }
 
-.campaign-groups h3 {
-  margin-bottom: 1rem;
+.analytics-label {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 0.25rem;
 }
 
-/* Form styles */
+/* Edit form */
 .edit-form {
-  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.required {
+  color: #e53935;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.65rem 0.75rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
+  box-sizing: border-box;
 }
 
-.groups-container {
-  margin-top: 0.5rem;
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4CAF50;
 }
 
-.groups-input {
-  display: flex;
-  gap: 0.5rem;
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
 }
 
-.add-group-button {
-  padding: 0.75rem 1.5rem;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.groups-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.group-tag {
-  background-color: #e0f2f1;
-  color: #00796b;
-  padding: 0.25rem 0.75rem;
-  border-radius: 16px;
-  font-size: 0.875rem;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.remove-group {
-  background: none;
-  border: none;
-  color: #00796b;
-  font-size: 1.25rem;
-  cursor: pointer;
-  padding: 0 0.25rem;
+.field-hint {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 0.25rem;
+  display: block;
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  margin-top: 2rem;
 }
 
 .cancel-button,
@@ -386,6 +614,7 @@ const handleDelete = async () => {
   border-radius: 4px;
   font-weight: 500;
   cursor: pointer;
+  font-size: 1rem;
 }
 
 .cancel-button {
@@ -400,46 +629,41 @@ const handleDelete = async () => {
   border: none;
 }
 
-.error-message {
-  background-color: #ffebee;
-  color: #c62828;
-  padding: 1rem;
-  border-radius: 4px;
-  margin-bottom: 1.5rem;
-}
-
-.loading {
-  text-align: center;
-  color: #666;
-  padding: 2rem;
+/* Danger zone */
+.danger-zone {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .delete-button {
   background-color: #e53935;
   color: white;
-  padding: 0.75rem 1.5rem;
+  padding: 0.6rem 1.25rem;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: 500;
 }
 
 .delete-confirmation {
+  margin-top: 1rem;
+  padding: 1rem;
   background-color: #fff3f3;
   border: 1px solid #e53935;
   border-radius: 4px;
-  padding: 1rem;
-  margin-top: 1rem;
 }
 
 .confirm-actions {
   display: flex;
   gap: 1rem;
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
 .confirm-delete-button,
 .cancel-delete-button {
-  padding: 0.75rem 1.5rem;
+  padding: 0.6rem 1.25rem;
   border-radius: 4px;
   font-weight: 500;
   cursor: pointer;
@@ -458,17 +682,32 @@ const handleDelete = async () => {
 }
 
 .loader {
+  display: inline-block;
   border: 2px solid rgba(255, 255, 255, 0.6);
   border-top: 2px solid white;
   border-radius: 50%;
   width: 1rem;
   height: 1rem;
   animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+  margin-right: 0.5rem;
 }
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-</style>
 
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.loading {
+  text-align: center;
+  color: #666;
+  padding: 2rem;
+}
+</style>
